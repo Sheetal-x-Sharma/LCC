@@ -7,7 +7,6 @@ import multer from "multer";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
 
-// Routes
 import authRoutes from "./routes/auth.js";
 import postsRoutes from "./routes/posts.js";
 import storiesRoutes from "./routes/stories.js";
@@ -20,31 +19,22 @@ import notificationsRoute from "./routes/notifications.js";
 dotenv.config();
 const app = express();
 
-// -------------------- MIDDLEWARE --------------------
+// ✅ TRUST PROXY for secure cookies via Render/Vercel
+app.set("trust proxy", 1);
 
-const allowedOrigins = [
-  "http://localhost:5173",                  // Local dev frontend
-  "https://lcc-frontend-lemon.vercel.app", // Deployed frontend
-];
+// ✅ FIXED CORS
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://lcc-frontend-lemon.vercel.app",
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (e.g., mobile apps, curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-        return callback(new Error(msg), false);
-      }
-
-      return callback(null, true);
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Allow cookies
-  })
-);
+app.use(express.json());
+app.use(cookieParser());
 
 app.use(express.json());
 app.use(cookieParser());
