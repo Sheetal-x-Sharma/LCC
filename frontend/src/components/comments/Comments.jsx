@@ -2,13 +2,13 @@ import "./comments.scss";
 import { useEffect, useState, useContext } from "react";
 import axios, { API_URL } from "../../axios";
 import { AuthContext } from "../../context/authContext";
+import Profileimg from "../../assets/images/img1.png";
 
 const Comments = ({ postId, onCommentAdded }) => {
   const { currentUser } = useContext(AuthContext);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
-  // Helper function to show relative time
   const timeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -27,7 +27,6 @@ const Comments = ({ postId, onCommentAdded }) => {
     return `${years} year${years > 1 ? "s" : ""} ago`;
   };
 
-  // Fetch comments on mount
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -40,7 +39,6 @@ const Comments = ({ postId, onCommentAdded }) => {
     fetchComments();
   }, [postId]);
 
-  // Send new comment
   const handleSend = async () => {
     if (!newComment.trim()) return;
 
@@ -57,22 +55,20 @@ const Comments = ({ postId, onCommentAdded }) => {
         created_at: new Date().toISOString(),
       };
 
-      setComments((prev) => [...prev, newCmt]);
+      const updatedComments = [...comments, newCmt];
+      setComments(updatedComments);
       setNewComment("");
 
-      if (onCommentAdded) {
-        onCommentAdded(comments.length + 1);
-      }
+      if (onCommentAdded) onCommentAdded(updatedComments.length);
     } catch (err) {
       console.log("Failed to send comment:", err.response?.data || err);
     }
   };
 
-  // Utility to get full profile image URL
   const getProfileImage = (img) => {
-    if (!img) return "/img1.png"; // fallback
-    if (img.startsWith("http")) return img; // external URL (Google, etc.)
-    return `${API_URL}${img}`; // prepend API_URL for backend images
+    if (!img) return Profileimg;
+    if (img.startsWith("http")) return img;
+    return `${API_URL}${img}`;
   };
 
   return (
@@ -90,7 +86,7 @@ const Comments = ({ postId, onCommentAdded }) => {
 
       {comments.map((comment) => (
         <div className="comment" key={comment.id}>
-          <img src={getProfileImage(comment.profilePicture)} alt="profile" />
+          <img src={getProfileImage(comment.profile_img)} alt="profile" />
           <div className="info">
             <span>{comment.name || "Anonymous"}</span>
             <p>{comment.comment_text}</p>
