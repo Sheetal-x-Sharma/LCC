@@ -17,11 +17,12 @@ const Login = () => {
   try {
     const googleIdToken = credentialResponse.credential; // ✅ Google token
 
-    const res = await axios.post(
+   const res = await axios.post(
   `${import.meta.env.VITE_API_BASE_URL}/auth/google`,
-  { token: googleIdToken },
+  { credential: googleIdToken },   // ✅ match backend expectation
   { withCredentials: true }
 );
+
 
 
     const { token: jwtToken, user, isNewUser } = res.data;
