@@ -4,7 +4,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  overflow: hidden; // ✅ prevents wrapper from extending horizontally
+  width: 100%;        // ✅ full container width
+  overflow: hidden;    // ✅ prevents wrapper from expanding horizontally
 
   .scroll-btn {
     border: none;
@@ -34,11 +35,11 @@
   display: flex;
   gap: 10px;
   overflow-x: auto;     // ✅ horizontal scroll
-  overflow-y: hidden;   // prevent vertical overflow
-  flex-wrap: nowrap;    // prevent wrapping/expanding
+  overflow-y: hidden;   // ✅ prevent vertical overflow
+  flex-wrap: nowrap;    // ✅ no wrapping, prevent expanding
   scroll-behavior: smooth;
-  padding: 10px 0;
   width: 100%;
+  padding: 10px 0;
 
   /* Optional: style scrollbars */
   scrollbar-width: thin; // Firefox
@@ -58,7 +59,8 @@
   }
 
   .story {
-    flex: 0 0 200px; // fixed width, prevents stretching container
+    flex: 0 0 auto; // ✅ prevents flex items from forcing extra width
+    width: 200px;   // fixed width
     border-radius: 10px;
     overflow: hidden;
     position: relative;
