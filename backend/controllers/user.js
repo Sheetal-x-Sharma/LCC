@@ -1,39 +1,36 @@
-import { connectDB } from "../connect.js";
+import { pool } from "../connect.js"; // use pool for persistent connections
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const dbPromise = connectDB();
-
-// ✅ Multer setup for image uploads
+// -------------------- MULTER SETUP --------------------
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination(req, file, cb) {
     const dir = "public/uploads/";
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
-  filename: function (req, file, cb) {
+  filename(req, file, cb) {
     const uniqueName = Date.now() + path.extname(file.originalname);
     cb(null, uniqueName);
   },
 });
-
 export const upload = multer({ storage });
 
-// ✅ Get user profile by ID with dynamic post count
+// -------------------- GET USER --------------------
 export const getUser = async (req, res) => {
   try {
-    const db = await dbPromise;
+    const userId = req.params.userId;
 
     // Fetch user
-    const [userData] = await db.query("SELECT * FROM users WHERE id = ?", [req.params.userId]);
+    const [userData] = await pool.execute("SELECT * FROM users WHERE id = ?", [userId]);
     if (!userData.length) return res.status(404).json("User not found!");
     const user = userData[0];
 
-    // Count posts
-    const [[{ count }]] = await db.query(
+    // Count posts dynamically
+    const [[{ count }]] = await pool.execute(
       "SELECT COUNT(*) AS count FROM posts WHERE user_id = ?",
-      [req.params.userId]
+      [userId]
     );
     user.posts_count = count;
 
@@ -44,12 +41,10 @@ export const getUser = async (req, res) => {
   }
 };
 
-// ✅ Update user details (with optional image upload)
+// -------------------- UPDATE USER --------------------
 export const updateUser = async (req, res) => {
   try {
-    const db = await dbPromise;
     const userId = req.params.userId;
-
     const {
       name,
       batch,
@@ -63,11 +58,10 @@ export const updateUser = async (req, res) => {
       instagram_url,
     } = req.body;
 
-    // ✅ Store paths as "/uploads/filename"
-    const profile_img = req.files?.profile_img
+    const profile_img = req.files?.profile_img?.[0]
       ? `/uploads/${req.files.profile_img[0].filename}`
       : null;
-    const cover_img = req.files?.cover_img
+    const cover_img = req.files?.cover_img?.[0]
       ? `/uploads/${req.files.cover_img[0].filename}`
       : null;
 
@@ -87,12 +81,12 @@ export const updateUser = async (req, res) => {
     if (profile_img) fields.push("profile_img = ?"), values.push(profile_img);
     if (cover_img) fields.push("cover_img = ?"), values.push(cover_img);
 
-    if (fields.length === 0) return res.status(400).json("No fields to update!");
+    if (!fields.length) return res.status(400).json("No fields to update!");
 
     const query = `UPDATE users SET ${fields.join(", ")} WHERE id = ?`;
     values.push(userId);
 
-    await db.query(query, values);
+    await pool.execute(query, values);
     res.status(200).json({ message: "Profile updated successfully!" });
   } catch (err) {
     console.error("Update user error:", err);
