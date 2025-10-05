@@ -36,27 +36,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(express.json());
-app.use(cookieParser());
-
 // -------------------- STATIC FILES --------------------
+// Keep for general access, but users should fetch via proxy for CORS safety
 app.use(express.static("public"));
-app.use(
-  "/uploads",
-  express.static(path.join(process.cwd(), "public/uploads"), {
-    setHeaders: (res) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-      res.setHeader(
-        "Access-Control-Allow-Headers",
-        "Content-Type, Authorization"
-      );
-      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-      res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
-      res.setHeader("Cache-Control", "public, max-age=31536000");
-    },
-  })
-);
 
 // -------------------- CLOUDINARY CONFIG --------------------
 cloudinary.config({
@@ -106,7 +88,7 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
     .catch((err) => console.error("❌ Cloud upload failed:", err.message));
 });
 
-// -------------------- GOOGLE IMAGE PROXY --------------------
+// -------------------- IMAGE PROXY (CORS SAFE) --------------------
 app.get("/api/proxy-image", async (req, res) => {
   try {
     const imageUrl = req.query.url;
@@ -123,6 +105,12 @@ app.get("/api/proxy-image", async (req, res) => {
     console.error("Proxy error:", err);
     res.status(500).json({ error: "Failed to proxy image" });
   }
+});
+
+// ✅ OPTIONAL: Redirect all /uploads requests to proxy to fix OpaqueResponseBlocking
+app.get("/uploads/:filename", (req, res) => {
+  const url = `${process.env.API_URL || `http://localhost:${process.env.PORT || 8800}`}/uploads/${req.params.filename}`;
+  res.redirect(`/api/proxy-image?url=${encodeURIComponent(url)}`);
 });
 
 // -------------------- ROUTES --------------------
