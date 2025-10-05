@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import { connectDB } from "./connect.js";
 import multer from "multer";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
@@ -30,7 +29,6 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(express.json());
 app.use(cookieParser());
 
@@ -49,9 +47,6 @@ app.use(
     },
   })
 );
-
-// -------------------- DATABASE --------------------
-const pool = await connectDB(); // Create pool once
 
 // -------------------- CLOUDINARY CONFIG --------------------
 cloudinary.config({
@@ -114,14 +109,14 @@ app.get("/api/proxy-image", async (req, res) => {
 });
 
 // -------------------- ROUTES --------------------
-app.use("/api/auth", authRoutes(pool));
-app.use("/api/posts", postsRoutes(pool));
-app.use("/api/stories", storiesRoutes(pool));
-app.use("/api/comments", commentsRoutes(pool));
-app.use("/api/users", userRoutes(pool));
-app.use("/api/likes", likesRoutes(pool));
-app.use("/api/followers", followersRoute(pool));
-app.use("/api/notifications", notificationsRoute(pool));
+app.use("/api/auth", authRoutes);
+app.use("/api/posts", postsRoutes);
+app.use("/api/stories", storiesRoutes);
+app.use("/api/comments", commentsRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/likes", likesRoutes);
+app.use("/api/followers", followersRoute);
+app.use("/api/notifications", notificationsRoute);
 
 // -------------------- START SERVER --------------------
 const PORT = process.env.PORT || 8800;
