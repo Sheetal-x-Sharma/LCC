@@ -19,7 +19,7 @@ const RightBar = () => {
         const res = await API.get("/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setLatestActivities(res.data);
+        setLatestActivities(res.data || []);
       } catch (err) {
         console.error("Failed to fetch latest activities:", err);
       }
@@ -27,18 +27,23 @@ const RightBar = () => {
     fetchActivities();
   }, [token]);
 
+  // ✅ SAFE fallback function
   const getProfileImage = (img) => {
-    if (!img) return ProfileFallback;
-    if (img.includes("lh3.googleusercontent.com")) {
+    if (!img || img === "null" || img === "undefined") return ProfileFallback;
+
+    if (img?.includes("lh3.googleusercontent.com")) {
       return `${API_URL}/api/proxy-image?url=${encodeURIComponent(img)}`;
     }
-    if (img.startsWith("/uploads/")) {
+
+    if (img?.startsWith("/uploads/")) {
       return `${API_URL}${img}`;
     }
-    return img;
+
+    return img || ProfileFallback;
   };
 
   const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return "";
     const diff = Math.floor((new Date() - new Date(timestamp)) / 1000);
     if (diff < 60) return `${diff} sec ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
@@ -94,7 +99,7 @@ const RightBar = () => {
                     alt={activity.actor_name || "User"}
                   />
                   <p>
-                    <span>{activity.actor_name}</span> posted something
+                    <span>{activity.actor_name || "Someone"}</span> posted something
                   </p>
                 </Link>
                 <span>{formatTimeAgo(activity.created_at)}</span>
