@@ -1,3 +1,4 @@
+
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import dotenv from "dotenv";
@@ -8,11 +9,15 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ✅ Google Login
 export const googleLogin = async (req, res) => {
-  const { token } = req.body;
+  const { credential } = req.body; // Google One Tap sends "credential"
 
   try {
+    if (!credential) {
+      return res.status(400).json({ message: "Google credential missing" });
+    }
+
     const ticket = await client.verifyIdToken({
-      idToken: token,
+      idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
@@ -46,11 +51,11 @@ export const googleLogin = async (req, res) => {
           name,
           email,
           picture,
-          "student",
+          "student", // default
           null,
           null,
           null,
-          "Jaipur",
+          "Jaipur",  // default city
           "Rajasthan",
           "India",
           null,
@@ -59,7 +64,7 @@ export const googleLogin = async (req, res) => {
           null,
           null,
           null,
-          "New user at LNMIIT Campus Connect!",
+          "New user at LNMIIT Campus Connect!", // default bio
           null,
           null,
         ]
@@ -83,8 +88,8 @@ export const googleLogin = async (req, res) => {
 
     res.cookie("access_token", tokenJWT, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // must be true for SameSite=None
-      sameSite: "none", // cross-site requests now work
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
     });
 
     res.status(200).json({
@@ -98,10 +103,10 @@ export const googleLogin = async (req, res) => {
       isNewUser,
     });
   } catch (error) {
-    console.error("Google login error:", error.sqlMessage || error.message);
+    console.error("Google login error:", error.message || error);
     return res.status(500).json({
       message: "Google login failed",
-      error: error.sqlMessage || error.message,
+      error: error.message || error,
     });
   }
 };
@@ -189,7 +194,8 @@ export const logout = (req, res) => {
   res.clearCookie("access_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "none", // cross-origin logout
+    sameSite: "none",
   });
   return res.status(200).json({ message: "Logged out successfully" });
 };
+
