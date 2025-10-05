@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/authContext";
 import Profileimg from "../../assets/images/img1.png";
 
 const Comments = ({ postId, onCommentAdded }) => {
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, token } = useContext(AuthContext);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
@@ -30,20 +30,25 @@ const Comments = ({ postId, onCommentAdded }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const res = await axios.get(`/comments/${postId}`);
-        setComments(res.data);
+        const res = await axios.get(`/comments/${postId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        setComments(res.data || []);
       } catch (err) {
-        console.log("Failed to fetch comments:", err);
+        console.log("Failed to fetch comments:", err.response?.data || err);
       }
     };
     fetchComments();
-  }, [postId]);
+  }, [postId, token]);
 
   const handleSend = async () => {
     if (!newComment.trim()) return;
 
+    if (!currentUser || !token) {
+      return alert("Login first to comment!");
+    }
+
     try {
-      const token = localStorage.getItem("jwt");
       const res = await axios.post(
         "/comments",
         { postId, comment_text: newComment },
@@ -79,7 +84,7 @@ const Comments = ({ postId, onCommentAdded }) => {
         <img src={currentUserImage} alt="profile" />
         <input
           type="text"
-          placeholder="write a comment"
+          placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />
