@@ -4,8 +4,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;        // ✅ full container width
-  overflow: hidden;    // ✅ prevents wrapper from expanding horizontally
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
 
   .scroll-btn {
     border: none;
@@ -21,28 +22,23 @@
       background: rgba(0, 0, 0, 0.5);
     }
   }
-
-  .scroll-btn.left {
-    margin-right: 5px;
-  }
-
-  .scroll-btn.right {
-    margin-left: 5px;
-  }
 }
 
 .stories {
   display: flex;
+  align-items: center;
   gap: 10px;
-  overflow-x: auto;     // ✅ horizontal scroll
-  overflow-y: hidden;   // ✅ prevent vertical overflow
-  flex-wrap: nowrap;    // ✅ no wrapping, prevent expanding
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
   scroll-behavior: smooth;
-  width: 100%;
-  padding: 10px 0;
 
-  /* Optional: style scrollbars */
-  scrollbar-width: thin; // Firefox
+  /* ✅ Show only 3 stories in visible area */
+  width: 660px; // (3 stories × 200px) + (2 gaps × 10px) + little padding
+  padding: 10px;
+  margin: 0 auto;
+
+  scrollbar-width: thin;
   scrollbar-color: #888 transparent;
 
   &::-webkit-scrollbar {
@@ -59,13 +55,17 @@
   }
 
   .story {
-    flex: 0 0 auto; // ✅ prevents flex items from forcing extra width
-    width: 200px;   // fixed width
+    flex: 0 0 200px; // each story fixed width
     border-radius: 10px;
     overflow: hidden;
     position: relative;
     background: #f0f0f0;
     cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.03);
+    }
 
     img,
     video {
@@ -83,28 +83,6 @@
       color: white;
       font-weight: 500;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    }
-
-    button {
-      position: absolute;
-      bottom: 40px;
-      left: 10px;
-      color: white;
-      background-color: #5271ff;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-
-      &:hover {
-        transform: scale(1.1);
-      }
     }
 
     /* Upload icon overlay only for first story */
