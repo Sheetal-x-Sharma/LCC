@@ -36,17 +36,17 @@ cd LCC
 ```
 
 ### 🧩 **📦 2️⃣ Install Dependencies**
-- **Backend**
--- ```bash
--- cd backend
--- npm install
+**Backend**
+```bash
+cd backend
+ npm install
 ```
 
-- **Frontend**
--- ```bash
--- cd ../frontend
--- npm install
--- ```
+ **Frontend**
+ ```bash
+cd ../frontend
+ npm install
+ ```
 
 ## 🌍 Live Demo
 
