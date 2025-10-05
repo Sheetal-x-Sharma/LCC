@@ -1,11 +1,8 @@
-import { connectDB } from "../connect.js";
-
-const dbPromise = connectDB();
+import { pool } from "../connect.js"; // <-- use pool instead of single connection
 
 // Follow a user
 export const followUser = async (req, res) => {
   try {
-    const db = await dbPromise;
     const followerId = req.userId;
     const { followingId } = req.body;
 
@@ -13,7 +10,7 @@ export const followUser = async (req, res) => {
     if (followerId === followingId) return res.status(400).json({ message: "You cannot follow yourself" });
 
     // Check if already following
-    const [existing] = await db.query(
+    const [existing] = await pool.execute(
       "SELECT * FROM followers WHERE follower_id=? AND following_id=?",
       [followerId, followingId]
     );
@@ -21,14 +18,14 @@ export const followUser = async (req, res) => {
       return res.status(400).json({ message: "Already following" });
 
     // Insert follow relation
-    await db.query(
+    await pool.execute(
       "INSERT INTO followers (follower_id, following_id) VALUES (?, ?)",
       [followerId, followingId]
     );
 
     // Update counts
-    await db.query("UPDATE users SET followers_count = followers_count + 1 WHERE id = ?", [followingId]);
-    await db.query("UPDATE users SET following_count = following_count + 1 WHERE id = ?", [followerId]);
+    await pool.execute("UPDATE users SET followers_count = followers_count + 1 WHERE id = ?", [followingId]);
+    await pool.execute("UPDATE users SET following_count = following_count + 1 WHERE id = ?", [followerId]);
 
     res.status(200).json({ message: "Followed successfully" });
   } catch (err) {
@@ -40,23 +37,19 @@ export const followUser = async (req, res) => {
 // Unfollow a user
 export const unfollowUser = async (req, res) => {
   try {
-    const db = await dbPromise;
     const followerId = req.userId;
-    const followingId = parseInt(req.params.followingId); // ✅ ensure number
+    const followingId = parseInt(req.params.followingId);
 
-    const result = await db.query(
+    const [result] = await pool.execute(
       "DELETE FROM followers WHERE follower_id = ? AND following_id = ?",
       [followerId, followingId]
     );
 
-    // result.affectedRows is inside result[0] for mysql2 promise
-    const affectedRows = result[0]?.affectedRows ?? result.affectedRows ?? 0;
-
-    if (affectedRows === 0)
+    if (result.affectedRows === 0)
       return res.status(404).json({ message: "Not following this user" });
 
-    await db.query("UPDATE users SET followers_count = followers_count - 1 WHERE id = ?", [followingId]);
-    await db.query("UPDATE users SET following_count = following_count - 1 WHERE id = ?", [followerId]);
+    await pool.execute("UPDATE users SET followers_count = followers_count - 1 WHERE id = ?", [followingId]);
+    await pool.execute("UPDATE users SET following_count = following_count - 1 WHERE id = ?", [followerId]);
 
     res.status(200).json({ message: "Unfollowed successfully" });
   } catch (err) {
@@ -68,10 +61,9 @@ export const unfollowUser = async (req, res) => {
 // Get followers of a user
 export const getFollowers = async (req, res) => {
   try {
-    const db = await dbPromise;
     const { userId } = req.params;
 
-    const [rows] = await db.query(
+    const [rows] = await pool.execute(
       `SELECT u.id, u.name, u.profile_img FROM followers f 
        JOIN users u ON f.follower_id = u.id WHERE f.following_id = ?`,
       [userId]
@@ -87,10 +79,9 @@ export const getFollowers = async (req, res) => {
 // Get following of a user
 export const getFollowing = async (req, res) => {
   try {
-    const db = await dbPromise;
     const { userId } = req.params;
 
-    const [rows] = await db.query(
+    const [rows] = await pool.execute(
       `SELECT u.id, u.name, u.profile_img FROM followers f 
        JOIN users u ON f.following_id = u.id WHERE f.follower_id = ?`,
       [userId]
@@ -106,11 +97,10 @@ export const getFollowing = async (req, res) => {
 // Check if current user is following another user
 export const checkFollowing = async (req, res) => {
   try {
-    const db = await dbPromise;
     const followerId = req.userId;
     const { followingId } = req.params;
 
-    const [rows] = await db.query(
+    const [rows] = await pool.execute(
       "SELECT * FROM followers WHERE follower_id=? AND following_id=?",
       [followerId, followingId]
     );
