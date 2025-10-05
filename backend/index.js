@@ -24,7 +24,7 @@ const app = express();
 // -------------------- MIDDLEWARE --------------------
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", process.env.VITE_SERVER_URL],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -35,37 +35,23 @@ app.use(express.json());
 app.use(cookieParser());
 
 // -------------------- STATIC FILES --------------------
-// Serve general public assets
 app.use(express.static("public"));
-
-// ✅ Serve uploads with CORS + ORB-safe headers
 app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "public/uploads"), {
-    setHeaders: (res, filePath) => {
-      // Allow access from frontend
+    setHeaders: (res) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-      // ORB / COEP / CORP safety
       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
       res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
-
-      // Cache and security hints
       res.setHeader("Cache-Control", "public, max-age=31536000");
-      res.setHeader("Content-Security-Policy", "cross-origin");
-
-      // Default type hint (helps some browsers)
-      if (!res.getHeader("Content-Type")) {
-        res.type("image/jpeg");
-      }
     },
   })
 );
 
 // -------------------- DATABASE --------------------
-connectDB();
+const pool = await connectDB(); // Create pool once
 
 // -------------------- CLOUDINARY CONFIG --------------------
 cloudinary.config({
@@ -76,53 +62,36 @@ cloudinary.config({
 
 // -------------------- MULTER SETUP --------------------
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads/");
-  },
+  destination: (req, file, cb) => cb(null, "public/uploads/"),
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
   },
 });
 
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "video/mp4",
-      "video/mkv",
-      "video/webm",
-    ];
-    if (allowedTypes.includes(file.mimetype)) cb(null, true);
-    else cb(new Error("Only images and videos are allowed"));
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "video/mp4", "video/mkv", "video/webm"];
+    cb(null, allowedTypes.includes(file.mimetype));
   },
 });
 
 // -------------------- UPLOAD ROUTE --------------------
 app.post("/api/upload", upload.single("file"), (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "File not found" });
+  if (!req.file) return res.status(400).json({ error: "File not found" });
 
-    const localPath = `/uploads/${req.file.filename}`;
-    res.status(200).json({ fileUrl: localPath });
+  const localPath = `/uploads/${req.file.filename}`;
+  res.status(200).json({ fileUrl: localPath });
 
-    // Optional async Cloudinary backup upload
-    cloudinary.uploader
-      .upload(req.file.path, {
-        resource_type: req.file.mimetype.startsWith("video") ? "video" : "image",
-        folder: "campus_connect",
-      })
-      .then((result) => console.log("✅ Cloud upload success:", result.secure_url))
-      .catch((err) => console.error("❌ Cloud upload failed:", err.message));
-  } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ error: "Failed to upload file" });
-  }
+  cloudinary.uploader
+    .upload(req.file.path, {
+      resource_type: req.file.mimetype.startsWith("video") ? "video" : "image",
+      folder: "campus_connect",
+    })
+    .then((result) => console.log("✅ Cloud upload success:", result.secure_url))
+    .catch((err) => console.error("❌ Cloud upload failed:", err.message));
 });
 
 // -------------------- GOOGLE IMAGE PROXY --------------------
@@ -133,7 +102,6 @@ app.get("/api/proxy-image", async (req, res) => {
 
     const response = await fetch(imageUrl);
     const buffer = await response.arrayBuffer();
-
     res.set("Content-Type", response.headers.get("content-type") || "image/jpeg");
     res.set("Access-Control-Allow-Origin", "*");
     res.set("Cross-Origin-Resource-Policy", "cross-origin");
@@ -146,14 +114,14 @@ app.get("/api/proxy-image", async (req, res) => {
 });
 
 // -------------------- ROUTES --------------------
-app.use("/api/auth", authRoutes);
-app.use("/api/posts", postsRoutes);
-app.use("/api/stories", storiesRoutes);
-app.use("/api/comments", commentsRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/likes", likesRoutes);
-app.use("/api/followers", followersRoute);
-app.use("/api/notifications", notificationsRoute);
+app.use("/api/auth", authRoutes(pool));
+app.use("/api/posts", postsRoutes(pool));
+app.use("/api/stories", storiesRoutes(pool));
+app.use("/api/comments", commentsRoutes(pool));
+app.use("/api/users", userRoutes(pool));
+app.use("/api/likes", likesRoutes(pool));
+app.use("/api/followers", followersRoute(pool));
+app.use("/api/notifications", notificationsRoute(pool));
 
 // -------------------- START SERVER --------------------
 const PORT = process.env.PORT || 8800;
