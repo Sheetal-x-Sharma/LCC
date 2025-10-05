@@ -1,18 +1,18 @@
-# 🌐 **LNMIIT Campus Connect (LCC)**
+# 🌐 **LNMIIT Campus Connect (LCC)**  
 
 A **full-stack social networking platform** built for **LNMIIT students** to connect, share posts, and collaborate.  
-Developed using **React**, **Node.js**, **Express**, and **MySQL** — with authentication, image uploads, and a responsive UI.
+Developed using **React**, **Node.js**, **Express**, and **MySQL** — featuring authentication, image uploads, and a responsive UI.  
 
 ---
 
 ## 🚀 **Features**
 
 - 🔐 **User Authentication** (JWT + Google Login)  
-- 👥 **Profile Management** (follow/unfollow system)  
+- 👥 **Profile Management** (Follow/Unfollow system)  
 - 📝 **Create & View Posts** with images  
-- 💬 **Comment System** (real-time updates)  
+- 💬 **Comment System** (Real-time updates)  
 - 📰 **Personalized Feed** for each user  
-- 🌈 **Responsive UI** with modern design (SCSS + React)
+- 🌈 **Responsive UI** (SCSS + React)
 
 ---
 
@@ -33,27 +33,26 @@ Developed using **React**, **Node.js**, **Express**, and **MySQL** — with auth
 ```bash
 git clone https://github.com/your-username/LCC.git
 cd LCC
-
-
 📦 2️⃣ Install Dependencies
-
 Backend
 
+bash
+Copy code
 cd backend
 npm install
-
-
 Frontend
 
+bash
+Copy code
 cd ../frontend
 npm install
-
 🔐 3️⃣ Setup Environment Variables
-
 Create a .env file in both backend and frontend directories.
 
 🗄️ Backend .env
 
+env
+Copy code
 PORT=8800
 DB_HOST=your_host
 DB_USER=your_user
@@ -61,75 +60,63 @@ DB_PASSWORD=your_password
 DB_NAME=lnmiit_campus_connect
 JWT_SECRET=your_secret_key
 GOOGLE_CLIENT_ID=your_google_client_id
-
-
 🌍 Frontend .env
 
+env
+Copy code
 VITE_API_URL=https://lcc-backend.onrender.com/api
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
-
 🧠 4️⃣ Run Locally
-
-Start Backend
-
+▶️ Start Backend
+bash
+Copy code
 cd backend
 npm start
+💻 Start Frontend
+Navigate to the frontend folder:
 
-
-Start Frontend
-
+bash
+Copy code
 cd ../frontend
+Now, start the development server:
+
+bash
+Copy code
 npm run dev
+🌍 Live Demo
+🔗 Frontend: https://lcc-frontend.vercel.app
 
----
+🔗 Backend API: https://lcc-backend.onrender.com
 
-## 🌍 Live Demo
+📸 Preview
+Coming soon: Screenshots of UI (Login, Feed, Profile, Comments, etc.)
 
-- 🔗 **Frontend:** [https://lcc-frontend.vercel.app](https://lcc-frontend.vercel.app)  
-- 🔗 **Backend API:** [https://lcc-backend.onrender.com](https://lcc-backend.onrender.com)
+🤝 Contributing
+Contributions are always welcome!
 
----
+Fork the repository
 
-## 📸 Preview
+Create a new branch (feature/your-feature-name)
 
-_Coming soon: Screenshots of UI (Login, Feed, Profile, Comments, etc.)_
+Commit your changes
 
----
+Push to your branch
 
-## 🤝 Contributing
+Open a Pull Request
 
-Contributions are always welcome!  
-If you'd like to improve this project:
+🧑‍💻 Developer
+👤 Sheetal Sharma
 
-1. **Fork** the repository  
-2. **Create a new branch** (`feature/your-feature-name`)  
-3. **Commit** your changes  
-4. **Push** to your branch  
-5. **Open a Pull Request**
+📧 your-email@example.com
 
----
+🌐 GitHub Profile
 
-## 🧑‍💻 Developer
-
-- 👤 **Sheetal Sharma**  
-- 📧 [your-email@example.com](mailto:your-email@example.com)  
-- 🌐 [GitHub Profile](https://github.com/Sheetal-x-Sharma)
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.  
+📄 License
+This project is licensed under the MIT License.
 You’re free to use, modify, and distribute this software with attribution.
 
----
+⭐ Support
+If you like this project, please ⭐ Star the repository — it helps others discover it!
 
-### ⭐ Support
-
-If you like this project, please **⭐ Star** the repository — it helps others discover it!
-
----
-
-### 🏷️ Keywords
-
-`React` • `Node.js` • `Express` • `MySQL` • `Google Login` • `JWT` • `Full Stack` • `Campus Connect` • `Social Media App` • `LNMIIT`
+🏷️ Keywords
+React • Node.js • Express • MySQL • Google Login • JWT • Full Stack • Campus Connect • Social Media App • LNMIIT
