@@ -9,9 +9,10 @@ export const connectDB = async () => {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      port: process.env.DB_PORT, // ✅ ADD THIS LINE
+      port: process.env.DB_PORT,
       ssl: {
-        rejectUnauthorized: true,
+        // ✅ Aiven uses self-signed certs, so we allow it:
+        rejectUnauthorized: false,
       },
     });
     console.log("✅ MySQL connected");
