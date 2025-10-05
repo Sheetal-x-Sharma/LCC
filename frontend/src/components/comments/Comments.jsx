@@ -90,27 +90,28 @@ const Comments = ({ postId, onCommentAdded }) => {
         />
         <button onClick={handleSend}>Send</button>
       </div>
+{comments.map((comment, index) => {
+  // Check if this is the latest comment added by current user
+  const isCurrentUserComment =
+    comment.userId === currentUser?.id ||
+    (!comment.userId && index === comments.length - 1);
 
-     {comments.map((comment) => {
-  // Use comment.profile_img if exists, otherwise fallback to currentUser if it's the latest comment
-  const profileImage =
-    comment.profile_img // backend returned
-      ? getProfileImage(comment.profile_img)
-      : comment.userId === currentUser?.id // newly added comment
-      ? currentUserImage
-      : Profileimg;
+  const profileImage = isCurrentUserComment
+    ? currentUserImage
+    : getProfileImage(comment.profile_img);
 
   return (
-    <div className="comment" key={comment.id}>
+    <div className="comment" key={comment.id || index}>
       <img src={profileImage} alt="profile" />
       <div className="info">
-        <span>{comment.name || "Anonymous"}</span>
+        <span>{comment.name || (isCurrentUserComment ? currentUser.name : "Anonymous")}</span>
         <p>{comment.comment_text}</p>
       </div>
       <span className="date">{timeAgo(comment.created_at)}</span>
     </div>
   );
 })}
+
 
     </div>
   );
