@@ -56,14 +56,30 @@ const LeftBar = () => {
     <div className="leftBar">
       <div className="container">
         <div className="menu">
-          <NavLink to={`/ownProfile/${currentUser?.id || ""}`} className="item">
-            <img
-              src={profileImage}
-              alt={currentUser?.name || "Guest"}
-              className="profile-pic circular"
-            />
-            <span>{currentUser?.name || "Guest"}</span>
-          </NavLink>
+         {currentUser ? (
+  <NavLink to={`/ownProfile/${currentUser.id}`} className="item">
+    <img
+      src={profileImage}
+      alt={currentUser.name}
+      className="profile-pic circular"
+    />
+    <span>{currentUser.name}</span>
+  </NavLink>
+) : (
+  <div
+    className="item guest-profile"
+    onClick={() => alert("Please login to view your profile")}
+    style={{ cursor: "pointer" }}
+  >
+    <img
+      src={profileImage}
+      alt="Guest"
+      className="profile-pic circular"
+    />
+    <span>Guest</span>
+  </div>
+)}
+
 
           <NavLink to="/friends" className="item">
             <img src={Friends} alt="friends icon" />
