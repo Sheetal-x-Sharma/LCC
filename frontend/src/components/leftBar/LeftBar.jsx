@@ -28,38 +28,42 @@ const LeftBar = () => {
     }
   };
 
-  // ✅ Utility to get user's profile image dynamically
+  // ✅ Safe image utility
   const getProfileImage = (user) => {
-    if (!user) return ProfileFallback;
+    if (!user || !user.profile_img || user.profile_img === "null" || user.profile_img === "undefined") {
+      return ProfileFallback;
+    }
+
+    const img = user.profile_img;
 
     // Google profile images
-    if (user.profile_img?.includes("lh3.googleusercontent.com")) {
-      return `${API_URL}/api/proxy-image?url=${encodeURIComponent(
-        user.profile_img
-      )}`;
+    if (img.includes("lh3.googleusercontent.com")) {
+      return `${API_URL}/api/proxy-image?url=${encodeURIComponent(img)}`;
     }
 
     // Uploaded image from backend
-    if (user.profile_img?.startsWith("/uploads/")) {
-      return `${API_URL}${user.profile_img}`;
+    if (img.startsWith("/uploads/")) {
+      return `${API_URL}${img}`;
     }
 
-    return user.profile_img || ProfileFallback;
+    // Already absolute or fallback
+    return img || ProfileFallback;
   };
+
+  const profileImage = getProfileImage(currentUser);
 
   return (
     <div className="leftBar">
       <div className="container">
         <div className="menu">
           <NavLink to={`/ownProfile/${currentUser?.id || ""}`} className="item">
-  <img
-    src={getProfileImage(currentUser)}
-    alt={currentUser?.name || "Guest"}
-    className="profile-pic circular"
-  />
-  <span>{currentUser?.name || "Guest"}</span>
-</NavLink>
-
+            <img
+              src={profileImage}
+              alt={currentUser?.name || "Guest"}
+              className="profile-pic circular"
+            />
+            <span>{currentUser?.name || "Guest"}</span>
+          </NavLink>
 
           <NavLink to="/friends" className="item">
             <img src={Friends} alt="friends icon" />
