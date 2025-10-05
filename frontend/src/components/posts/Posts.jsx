@@ -39,10 +39,12 @@ const Posts = ({ newPost, userId }) => {
     );
   };
 
+  const validPosts = posts.filter((p) => p && p.userId && p.name);
+
   return (
     <div className="posts">
-      {posts.length > 0 ? (
-        posts.map((post, index) => (
+      {validPosts.length > 0 ? (
+        validPosts.map((post, index) => (
           <Post
             key={post.id || index}
             post={post}
