@@ -30,11 +30,15 @@ const OwnProfile = () => {
   const [profileFile, setProfileFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
 
+  const API_BASE = import.meta.env.VITE_API_BASE_URL; // ✅ Use env variable
+
   useEffect(() => {
     if (!currentUser) return;
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:8800/api/users/${currentUser.id}`);
+        const res = await axios.get(`${API_BASE}/users/${currentUser.id}`, {
+          withCredentials: true,
+        });
         setUser(res.data);
         setBio(res.data.bio || "");
         setAbout(res.data.about || "");
@@ -48,7 +52,7 @@ const OwnProfile = () => {
       }
     };
     fetchUser();
-  }, [currentUser]);
+  }, [currentUser, API_BASE]);
 
   // Save edited profile
   const handleSave = async () => {
@@ -64,13 +68,16 @@ const OwnProfile = () => {
       if (profileFile) formData.append("profile_img", profileFile);
       if (coverFile) formData.append("cover_img", coverFile);
 
-      await axios.put(`http://localhost:8800/api/users/${currentUser.id}`, formData, {
+      await axios.put(`${API_BASE}/users/${currentUser.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
       });
 
       setEditing(false);
 
-      const updated = await axios.get(`http://localhost:8800/api/users/${currentUser.id}`);
+      const updated = await axios.get(`${API_BASE}/users/${currentUser.id}`, {
+        withCredentials: true,
+      });
       setUser(updated.data);
     } catch (err) {
       console.error("Update error:", err);
@@ -82,13 +89,13 @@ const OwnProfile = () => {
 
   const getProfileImg = () => {
     if (profileFile) return URL.createObjectURL(profileFile);
-    if (user.profile_img) return `http://localhost:8800${user.profile_img}`;
+    if (user.profile_img) return `${API_BASE.replace("/api", "")}${user.profile_img}`;
     return Profileimg;
   };
 
   const getCoverImg = () => {
     if (coverFile) return URL.createObjectURL(coverFile);
-    if (user.cover_img) return `http://localhost:8800${user.cover_img}`;
+    if (user.cover_img) return `${API_BASE.replace("/api", "")}${user.cover_img}`;
     return Cover;
   };
 
