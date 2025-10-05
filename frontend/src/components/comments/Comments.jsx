@@ -41,34 +41,37 @@ const Comments = ({ postId, onCommentAdded }) => {
     fetchComments();
   }, [postId, token]);
 
-  const handleSend = async () => {
-    if (!newComment.trim()) return;
+ const handleSend = async () => {
+  if (!newComment.trim()) return;
 
-    if (!currentUser || !token) {
-      return alert("Login first to comment!");
-    }
+  if (!currentUser || !token) {
+    return alert("Login first to comment!");
+  }
 
-    try {
-      const res = await axios.post(
-        "/comments",
-        { postId, comment_text: newComment },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  try {
+    const res = await axios.post(
+      "/comments",
+      { postId, comment_text: newComment },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      const newCmt = {
-        ...res.data,
-        created_at: new Date().toISOString(),
-      };
+    // Add current user info to the new comment
+    const newCmt = {
+      ...res.data,
+      created_at: new Date().toISOString(),
+      userId: currentUser.id,
+      profile_img: currentUser.profile_img,
+      name: currentUser.name,
+    };
 
-      const updatedComments = [...comments, newCmt];
-      setComments(updatedComments);
-      setNewComment("");
+    setComments((prev) => [...prev, newCmt]);
+    setNewComment("");
 
-      if (onCommentAdded) onCommentAdded(updatedComments.length);
-    } catch (err) {
-      console.log("Failed to send comment:", err.response?.data || err);
-    }
-  };
+    if (onCommentAdded) onCommentAdded(comments.length + 1);
+  } catch (err) {
+    console.log("Failed to send comment:", err.response?.data || err);
+  }
+};
 
   const getProfileImage = (img) => {
     if (!img || img === "null" || img === "undefined") return Profileimg;
