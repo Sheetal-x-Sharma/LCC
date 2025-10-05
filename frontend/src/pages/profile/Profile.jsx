@@ -1,8 +1,7 @@
-// frontend/src/pages/profile/Profile.jsx
 import "./profile.scss";
 import { useState, useRef, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import axios, { API_URL } from "../../axios";
+import axios from "axios";
 import FacebookTwoToneIcon from "@mui/icons-material/FacebookTwoTone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
@@ -27,10 +26,12 @@ const Profile = () => {
   const [postsCount, setPostsCount] = useState(0);
   const menuRef = useRef(null);
 
+  const API_BASE = import.meta.env.VITE_API_BASE_URL; // ✅ Use env variable
+
   // ------------------ FETCH USER ------------------
   const fetchUserData = async () => {
     try {
-      const res = await axios.get(`/users/${id}`);
+      const res = await axios.get(`${API_BASE}/users/${id}`, { withCredentials: true });
       setUser(res.data || {});
     } catch (err) {
       console.error("Error fetching user:", err);
@@ -40,27 +41,27 @@ const Profile = () => {
 
   useEffect(() => {
     fetchUserData();
-  }, [id]);
+  }, [id, API_BASE]);
 
   // ------------------ FETCH POSTS COUNT ------------------
   useEffect(() => {
     const fetchPostsCount = async () => {
       try {
-        const res = await axios.get(`/posts?userId=${id}`);
+        const res = await axios.get(`${API_BASE}/posts?userId=${id}`, { withCredentials: true });
         setPostsCount(res.data?.length || 0);
       } catch (err) {
         console.error("Error fetching posts count:", err);
       }
     };
     fetchPostsCount();
-  }, [id]);
+  }, [id, API_BASE]);
 
   // ------------------ FETCH FOLLOWING STATUS ------------------
   useEffect(() => {
     if (!currentUser) return;
     const checkFollowingStatus = async () => {
       try {
-        const res = await axios.get(`/followers/check/${id}`, {
+        const res = await axios.get(`${API_BASE}/followers/check/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFollowing(res.data?.following || false);
@@ -69,7 +70,7 @@ const Profile = () => {
       }
     };
     checkFollowingStatus();
-  }, [id, currentUser, token]);
+  }, [id, currentUser, token, API_BASE]);
 
   // ------------------ HANDLE FOLLOW / UNFOLLOW ------------------
   const handleFollowToggle = async () => {
@@ -78,8 +79,9 @@ const Profile = () => {
       let updatedUser = { ...user };
 
       if (following) {
-        await axios.delete(`/followers/${id}`, {
+        await axios.delete(`${API_BASE}/followers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         });
         setFollowing(false);
         updatedUser.followers_count = Math.max(
@@ -88,9 +90,9 @@ const Profile = () => {
         );
       } else {
         await axios.post(
-          `/followers`,
+          `${API_BASE}/followers`,
           { followingId: id },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
         );
         setFollowing(true);
         updatedUser.followers_count = (updatedUser.followers_count || 0) + 1;
@@ -115,31 +117,26 @@ const Profile = () => {
 
   if (!user) return <div>Loading profile...</div>;
 
+  const getProfileImg = () => (user.profile_img ? API_BASE.replace("/api", "") + user.profile_img : Profileimg);
+  const getCoverImg = () => (user.cover_img ? API_BASE.replace("/api", "") + user.cover_img : Cover);
+
   return (
     <div className="profile">
       <div className="images">
-        <img
-          src={user.cover_img ? API_URL + user.cover_img : Cover}
-          alt="Cover"
-          className="cover"
-        />
-        <img
-          src={user.profile_img ? API_URL + user.profile_img : Profileimg}
-          alt="Profile"
-          className="profilePic"
-        />
+        <img src={getCoverImg()} alt="Cover" className="cover" />
+        <img src={getProfileImg()} alt="Profile" className="profilePic" />
       </div>
 
       <div className="profileContainer">
         <div className="uInfo">
           <div className="left">
-            <a href={user.facebook_url || "http://facebook.com"} target="_blank">
+            <a href={user.facebook_url || "http://facebook.com"} target="_blank" rel="noreferrer">
               <FacebookTwoToneIcon fontSize="large" />
             </a>
-            <a href={user.instagram_url || "https://www.instagram.com/"} target="_blank">
+            <a href={user.instagram_url || "https://www.instagram.com/"} target="_blank" rel="noreferrer">
               <InstagramIcon fontSize="large" />
             </a>
-            <a href={user.linkedin_url || "https://linkedin.com"} target="_blank">
+            <a href={user.linkedin_url || "https://linkedin.com"} target="_blank" rel="noreferrer">
               <LinkedInIcon fontSize="large" />
             </a>
           </div>
@@ -167,43 +164,24 @@ const Profile = () => {
           </div>
 
           <div className="right">
-            <a href={`mailto:${user.email || ""}`}>
-              <EmailOutlinedIcon />
-            </a>
+            <a href={`mailto:${user.email || ""}`}><EmailOutlinedIcon /></a>
             <div className="menuContainer" ref={menuRef}>
-              <MoreVertIcon
-                onClick={() => setMenuOpen(!menuOpen)}
-                style={{ cursor: "pointer" }}
-              />
+              <MoreVertIcon onClick={() => setMenuOpen(!menuOpen)} style={{ cursor: "pointer" }} />
               {menuOpen && (
                 <div className="dropdownMenu">
-                  <span onClick={handleFollowToggle}>
-                    {following ? "Unfollow" : "Follow"}
-                  </span>
-                  <span onClick={() => setBlocked(!blocked)}>
-                    {blocked ? "Unblock" : "Block"}
-                  </span>
-                  <span onClick={() => setMuted(!muted)}>
-                    {muted ? "Unmute" : "Mute"}
-                  </span>
+                  <span onClick={handleFollowToggle}>{following ? "Unfollow" : "Follow"}</span>
+                  <span onClick={() => setBlocked(!blocked)}>{blocked ? "Unblock" : "Block"}</span>
+                  <span onClick={() => setMuted(!muted)}>{muted ? "Unmute" : "Mute"}</span>
                 </div>
               )}
             </div>
           </div>
 
           <div className="stats">
-            <span>
-              <strong>{postsCount}</strong> <br />Posts
-            </span>
-            <span>
-              <strong>{user.followers_count || 0}</strong> <br />Followers
-            </span>
-            <span>
-              <strong>{user.following_count || 0}</strong> <br />Following
-            </span>
-            <span>
-              <strong>{user.dedications_count || 0}</strong> <br />Dedications
-            </span>
+            <span><strong>{postsCount}</strong><br />Posts</span>
+            <span><strong>{user.followers_count || 0}</strong><br />Followers</span>
+            <span><strong>{user.following_count || 0}</strong><br />Following</span>
+            <span><strong>{user.dedications_count || 0}</strong><br />Dedications</span>
           </div>
         </div>
 
