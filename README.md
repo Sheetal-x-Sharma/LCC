@@ -81,47 +81,53 @@ Start Frontend
 cd ../frontend
 npm run dev
 
-🌍 Live Demo
+## 🌍 Live Demo
 
-🔗 Frontend: https://lcc-frontend.vercel.app
+- 🔗 **Frontend:** [https://lcc-frontend.vercel.app](https://lcc-frontend.vercel.app)  
+- 🔗 **Backend API:** [https://lcc-backend.onrender.com](https://lcc-backend.onrender.com)
 
-🔗 Backend API: https://lcc-backend.onrender.com
+---
 
-📸 Preview
+## 📸 Preview
 
-Coming soon: Screenshots of UI (Login, Feed, Profile, Comments, etc.)
+_Coming soon: Screenshots of UI (Login, Feed, Profile, Comments, etc.)_
 
-🤝 Contributing
+---
 
-Contributions are always welcome!
+## 🤝 Contributing
+
+Contributions are always welcome!  
 If you'd like to improve this project:
 
-Fork the repository
+1. **Fork** the repository  
+2. **Create a new branch** (`feature/your-feature-name`)  
+3. **Commit** your changes  
+4. **Push** to your branch  
+5. **Open a Pull Request**
 
-Create a new branch (feature/your-feature-name)
+---
 
-Commit your changes
+## 🧑‍💻 Developer
 
-Push to your branch
+- 👤 **Sheetal Sharma**  
+- 📧 [your-email@example.com](mailto:your-email@example.com)  
+- 🌐 [GitHub Profile](https://github.com/Sheetal-x-Sharma)
 
-Open a Pull Request
+---
 
-🧑‍💻 Developer
+## 📄 License
 
-👤 Sheetal Sharma
-📧 your-email@example.com
-
-🌐 GitHub Profile
-
-📄 License
-
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.  
 You’re free to use, modify, and distribute this software with attribution.
 
-⭐ Support
+---
 
-If you like this project, please ⭐ Star the repository — it helps others discover it!
+### ⭐ Support
 
-🏷️ Keywords
+If you like this project, please **⭐ Star** the repository — it helps others discover it!
 
-React • Node.js • Express • MySQL • Google Login • JWT • Full Stack • Campus Connect • Social Media App • LNMIIT
+---
+
+### 🏷️ Keywords
+
+`React` • `Node.js` • `Express` • `MySQL` • `Google Login` • `JWT` • `Full Stack` • `Campus Connect` • `Social Media App` • `LNMIIT`
