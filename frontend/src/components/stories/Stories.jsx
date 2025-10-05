@@ -53,24 +53,29 @@ const Stories = () => {
     setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return alert("Please select a file");
+ const handleUpload = async () => {
+  if (!selectedFile) return alert("Please select a file");
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
+  const formData = new FormData();
+  formData.append("file", selectedFile);
 
-    try {
-      await API.post("/stories", formData, {
-        headers: { Authorization: "Bearer " + token },
-      });
+  try {
+    // Optionally, you can show a loading spinner here
+    await API.post("/stories", formData, {
+      headers: { Authorization: "Bearer " + token },
+    });
 
-      fetchStories();
-      handleCloseModal();
-    } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Upload failed!");
-    }
-  };
+    // Refresh stories
+    await fetchStories();
+
+    // ✅ Close modal immediately after successful upload
+    handleCloseModal();
+  } catch (err) {
+    console.error("Upload failed:", err);
+    alert("Upload failed!");
+  }
+};
+
 
   const scrollLeft = () =>
     scrollRef.current.scrollBy({ left: -250, behavior: "smooth" });
