@@ -1,4 +1,4 @@
-🌐 LNMIIT Campus Connect (LCC)
+##🌐 LNMIIT Campus Connect (LCC)
 
 A full-stack social networking platform built for LNMIIT students to connect, share posts, and collaborate.
 Built with React, Node.js, Express, and MySQL.
