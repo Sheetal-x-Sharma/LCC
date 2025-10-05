@@ -6,7 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import moment from "moment";
-import { connectDB } from "../connect.js";
+import { pool } from "../connect.js"; // ✅ use pool instead of connectDB
 
 dotenv.config();
 
@@ -18,7 +18,6 @@ cloudinary.config({
 });
 
 const router = express.Router();
-const dbPromise = connectDB();
 
 // Ensure uploads/stories directory exists
 const storiesDir = path.join(process.cwd(), "public/uploads/stories");
@@ -28,7 +27,6 @@ if (!fs.existsSync(storiesDir)) fs.mkdirSync(storiesDir, { recursive: true });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, storiesDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
     cb(null, Date.now() + "_" + file.originalname.replace(/\s+/g, "_"));
   },
 });
@@ -52,7 +50,6 @@ router.get("/", async (req, res) => {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, process.env.JWT_SECRET);
 
-    const db = await dbPromise;
     const q = `
       SELECT s.*, u.name, u.profile_img 
       FROM stories AS s 
@@ -60,7 +57,7 @@ router.get("/", async (req, res) => {
       ORDER BY s.created_at DESC
       LIMIT 10
     `;
-    const [data] = await db.query(q);
+    const [data] = await pool.query(q); // ✅ use pool
     res.status(200).json(data);
   } catch (err) {
     console.error(err);
@@ -68,7 +65,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ===== ADD STORY (local + DB + async cloud) =====
+// ===== ADD STORY =====
 router.post("/", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "File is required" });
@@ -83,15 +80,12 @@ router.post("/", upload.single("file"), async (req, res) => {
     const userInfo = jwt.verify(token, process.env.JWT_SECRET);
 
     // Save in DB
-    const db = await dbPromise;
     const expiresAt = moment().add(24, "hours").format("YYYY-MM-DD HH:mm:ss");
-
-    await db.query(
+    await pool.query(
       "INSERT INTO stories (user_id, img_url, media_type, created_at, expires_at) VALUES (?, ?, ?, NOW(), ?)",
       [userInfo.id, localPath, mediaType, expiresAt]
     );
 
-    // Respond immediately
     res.status(200).json({ fileUrl: localPath, media_type: mediaType });
 
     // Async Cloudinary backup
@@ -118,8 +112,7 @@ router.delete("/:id", async (req, res) => {
     const userInfo = jwt.verify(token, process.env.JWT_SECRET);
 
     const storyId = req.params.id;
-    const db = await dbPromise;
-    const [result] = await db.query(
+    const [result] = await pool.query(
       "DELETE FROM stories WHERE id = ? AND user_id = ?",
       [storyId, userInfo.id]
     );
