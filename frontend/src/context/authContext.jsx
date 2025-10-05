@@ -1,5 +1,6 @@
+// context/authContext.jsx
 import { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axios"; // uses the configured axios instance
 import { googleLogout } from "@react-oauth/google";
 
 export const AuthContext = createContext();
@@ -9,9 +10,11 @@ export const AuthContextProvider = ({ children }) => {
     JSON.parse(localStorage.getItem("user")) || null
   );
   const [token, setToken] = useState(localStorage.getItem("jwt") || null);
-  const [googleIdToken, setGoogleIdToken] = useState(localStorage.getItem("googleIdToken") || null);
+  const [googleIdToken, setGoogleIdToken] = useState(
+    localStorage.getItem("googleIdToken") || null
+  );
 
-  // ✅ Login now also stores Google ID token
+  // ✅ Login stores JWT + Google ID token
   const login = (userData, userToken, googleToken) => {
     setCurrentUser(userData);
     setToken(userToken);
@@ -22,25 +25,21 @@ export const AuthContextProvider = ({ children }) => {
     localStorage.setItem("googleIdToken", googleToken);
   };
 
-  // ✅ Logout (clear backend + Google + revoke Google session)
+  // ✅ Logout clears backend + Google + revoke ID token
   const logout = async () => {
     try {
-      // Clear backend cookie
-      await axios.post("http://localhost:8800/api/auth/logout", {}, { withCredentials: true });
+      await axios.post("/auth/logout", {}, { withCredentials: true });
     } catch (err) {
       console.error("Backend logout failed:", err);
     }
 
     try {
-      // SDK logout
       googleLogout();
 
-      // Disable One Tap
-      if (window.google && window.google.accounts && window.google.accounts.id) {
+      if (window.google?.accounts?.id) {
         window.google.accounts.id.disableAutoSelect();
       }
 
-      // ✅ Revoke the real Google ID token
       if (googleIdToken) {
         await fetch(`https://oauth2.googleapis.com/revoke?token=${googleIdToken}`, {
           method: "POST",
@@ -51,7 +50,6 @@ export const AuthContextProvider = ({ children }) => {
       console.error("Google logout failed:", err);
     }
 
-    // ✅ Clear state + storage
     setCurrentUser(null);
     setToken(null);
     setGoogleIdToken(null);
@@ -73,5 +71,3 @@ export const AuthContextProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-
