@@ -81,6 +81,8 @@ Start Frontend
 cd ../frontend
 npm run dev
 
+---
+
 ## 🌍 Live Demo
 
 - 🔗 **Frontend:** [https://lcc-frontend.vercel.app](https://lcc-frontend.vercel.app)  
