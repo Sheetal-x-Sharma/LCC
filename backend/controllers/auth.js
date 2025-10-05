@@ -1,19 +1,10 @@
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import mysql from "mysql2/promise";
 import dotenv from "dotenv";
+import { pool } from "../connect.js"; // <-- use pool instead of creating a new connection
 
 dotenv.config();
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-// ✅ MySQL connection
-const db = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
 
 // ✅ Google Login
 export const googleLogin = async (req, res) => {
@@ -34,7 +25,7 @@ export const googleLogin = async (req, res) => {
         .json({ message: "Only LNMIIT email addresses are allowed." });
     }
 
-    const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [
+    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
 
@@ -42,7 +33,7 @@ export const googleLogin = async (req, res) => {
     let isNewUser = false;
 
     if (rows.length === 0) {
-      const [result] = await db.query(
+      const [result] = await pool.execute(
         `INSERT INTO users (
           google_id, name, email, profile_img, 
           user_type, batch, company_name, role, 
@@ -119,8 +110,7 @@ export const googleLogin = async (req, res) => {
 export const completeRegister = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
-    if (!authHeader)
-      return res.status(401).json({ message: "No token provided" });
+    if (!authHeader) return res.status(401).json({ message: "No token provided" });
 
     const token = authHeader.split(" ")[1];
     if (!token) return res.status(401).json({ message: "Invalid token" });
@@ -133,49 +123,22 @@ export const completeRegister = async (req, res) => {
     }
 
     const userId = decoded.id;
-
     const {
-      user_type,
-      batch,
-      company_name,
-      role,
-      city,
-      state,
-      country,
-      department,
-      designation,
-      linkedin_url,
-      github_url,
-      instagram_url,
-      facebook_url,
-      personal_website,
-      bio,
-      about,
+      user_type, batch, company_name, role, city, state, country,
+      department, designation, linkedin_url, github_url,
+      instagram_url, facebook_url, personal_website, bio, about,
     } = req.body;
 
-    const [result] = await db.query(
+    const [result] = await pool.execute(
       `UPDATE users 
        SET user_type=?, batch=?, company_name=?, role=?, city=?, state=?, country=?, 
            department=?, designation=?, linkedin_url=?, github_url=?, instagram_url=?, 
            facebook_url=?, personal_website=?, bio=?, about=?
        WHERE id=?`,
       [
-        user_type,
-        batch,
-        company_name,
-        role,
-        city,
-        state,
-        country,
-        department,
-        designation,
-        linkedin_url,
-        github_url,
-        instagram_url,
-        facebook_url,
-        personal_website,
-        bio,
-        about,
+        user_type, batch, company_name, role, city, state, country,
+        department, designation, linkedin_url, github_url,
+        instagram_url, facebook_url, personal_website, bio, about,
         userId,
       ]
     );
@@ -195,8 +158,7 @@ export const completeRegister = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
-    if (!authHeader)
-      return res.status(401).json({ message: "No token provided" });
+    if (!authHeader) return res.status(401).json({ message: "No token provided" });
 
     const token = authHeader.split(" ")[1];
     if (!token) return res.status(401).json({ message: "Invalid token" });
@@ -209,7 +171,7 @@ export const getMe = async (req, res) => {
     }
 
     const userId = decoded.id;
-    const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
+    const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [userId]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -228,7 +190,6 @@ export const logout = (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-   
   });
   return res.status(200).json({ message: "Logged out successfully" });
 };
