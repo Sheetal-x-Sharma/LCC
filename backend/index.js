@@ -1,3 +1,4 @@
+// backend/server.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -20,15 +21,31 @@ import notificationsRoute from "./routes/notifications.js";
 dotenv.config();
 const app = express();
 
+// -------------------- CORS --------------------
+const allowedOrigins = [
+  "http://localhost:5173",                   // Local dev
+  "https://lcc-frontend-lemon.vercel.app"   // Vercel prod
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow Postman or server requests
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true
+}));
+
+app.options("*", cors({
+  origin: allowedOrigins,
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true
+}));
+
 // -------------------- MIDDLEWARE --------------------
-app.use(
-  cors({
-    origin: ["http://localhost:5173", process.env.VITE_SERVER_URL],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -38,9 +55,6 @@ app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "public/uploads"), {
     setHeaders: (res) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
       res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
       res.setHeader("Cache-Control", "public, max-age=31536000");
@@ -68,7 +82,10 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "video/mp4", "video/mkv", "video/webm"];
+    const allowedTypes = [
+      "image/jpeg", "image/png", "image/jpg",
+      "video/mp4", "video/mkv", "video/webm"
+    ];
     cb(null, allowedTypes.includes(file.mimetype));
   },
 });
@@ -85,8 +102,8 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
       resource_type: req.file.mimetype.startsWith("video") ? "video" : "image",
       folder: "campus_connect",
     })
-    .then((result) => console.log("✅ Cloud upload success:", result.secure_url))
-    .catch((err) => console.error("❌ Cloud upload failed:", err.message));
+    .then(result => console.log("✅ Cloud upload success:", result.secure_url))
+    .catch(err => console.error("❌ Cloud upload failed:", err.message));
 });
 
 // -------------------- GOOGLE IMAGE PROXY --------------------
@@ -100,7 +117,6 @@ app.get("/api/proxy-image", async (req, res) => {
     res.set("Content-Type", response.headers.get("content-type") || "image/jpeg");
     res.set("Access-Control-Allow-Origin", "*");
     res.set("Cross-Origin-Resource-Policy", "cross-origin");
-
     res.send(Buffer.from(buffer));
   } catch (err) {
     console.error("Proxy error:", err);
@@ -108,7 +124,7 @@ app.get("/api/proxy-image", async (req, res) => {
   }
 });
 
-// -------------------- ROUTES --------------------
+// -------------------- API ROUTES --------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/stories", storiesRoutes);
