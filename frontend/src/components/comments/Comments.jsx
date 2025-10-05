@@ -99,9 +99,9 @@ const Comments = ({ postId, onCommentAdded }) => {
     comment.userId === currentUser?.id ||
     (!comment.userId && index === comments.length - 1);
 
-  const profileImage = isCurrentUserComment
-    ? currentUserImage
-    : getProfileImage(comment.profile_img);
+ const profileImage = isCurrentUserComment
+  ? currentUserImage
+  : getProfileImage(comment.profile_img || comment.profilePicture);
 
   return (
     <div className="comment" key={comment.id || index}>
