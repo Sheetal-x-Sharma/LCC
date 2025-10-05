@@ -17,9 +17,9 @@ const Login = () => {
   try {
     const googleIdToken = credentialResponse.credential; // ✅ Google token
 
-   const res = await axios.post(
+  const res = await axios.post(
   `${import.meta.env.VITE_API_BASE_URL}/auth/google`,
-  { credential: googleIdToken },   // ✅ match backend expectation
+  { token: googleIdToken },   // ✅ correct key name
   { withCredentials: true }
 );
 
