@@ -6,7 +6,11 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  overflow: hidden;
+  overflow: hidden; // ✅ prevents wrapper from stretching
+  box-sizing: border-box;
+
+  /* ✅ Prevent the entire page from overflowing horizontally */
+  max-width: 100vw;
 
   .scroll-btn {
     border: none;
@@ -26,17 +30,18 @@
 
 .stories {
   display: flex;
-  align-items: center;
   gap: 10px;
   overflow-x: auto;
   overflow-y: hidden;
   flex-wrap: nowrap;
   scroll-behavior: smooth;
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
 
-  /* ✅ Show only 3 stories in visible area */
-  width: 660px; // (3 stories × 200px) + (2 gaps × 10px) + little padding
-  padding: 10px;
-  margin: 0 auto;
+  /* ✅ Hard stop: never let child width push the page */
+  max-width: 100%;
+  min-width: 0;
 
   scrollbar-width: thin;
   scrollbar-color: #888 transparent;
@@ -55,17 +60,13 @@
   }
 
   .story {
-    flex: 0 0 200px; // each story fixed width
+    flex: 0 0 auto;
+    width: 200px;
     border-radius: 10px;
     overflow: hidden;
     position: relative;
     background: #f0f0f0;
     cursor: pointer;
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: scale(1.03);
-    }
 
     img,
     video {
@@ -85,7 +86,6 @@
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     }
 
-    /* Upload icon overlay only for first story */
     &:first-child img:last-child {
       position: absolute;
       bottom: 35px;
