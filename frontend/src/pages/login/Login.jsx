@@ -18,10 +18,11 @@ const Login = () => {
     const googleIdToken = credentialResponse.credential; // ✅ Google token
 
     const res = await axios.post(
-      "http://localhost:8800/api/auth/google",
-      { token: googleIdToken },
-      { withCredentials: true }
-    );
+  `${import.meta.env.VITE_API_BASE_URL}/auth/google`,
+  { token: googleIdToken },
+  { withCredentials: true }
+);
+
 
     const { token: jwtToken, user, isNewUser } = res.data;
 
