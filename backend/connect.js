@@ -1,29 +1,23 @@
+// backend/connect.js
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
 
-let pool;
+// ✅ Create a connection pool
+export const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,  // adjust as needed
+  queueLimit: 0,
+});
 
-export const connectDB = async () => {
-  try {
-    if (!pool) {
-      pool = mysql.createPool({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        port: process.env.DB_PORT,
-        ssl: {
-          rejectUnauthorized: false, // allow self-signed certs
-        },
-        waitForConnections: true,
-        connectionLimit: 10, // max 10 concurrent connections
-        queueLimit: 0,
-      });
-      console.log("✅ MySQL pool created");
-    }
-    return pool;
-  } catch (err) {
-    console.error("❌ MySQL connection failed:", err.message);
-  }
-};
+// Optional: test connection
+pool.getConnection()
+  .then(conn => {
+    console.log("✅ MySQL pool connected");
+    conn.release();
+  })
+  .catch(err => console.error("❌ MySQL pool connection failed:", err.message));
