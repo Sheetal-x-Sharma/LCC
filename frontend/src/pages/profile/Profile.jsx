@@ -1,3 +1,4 @@
+// frontend/src/pages/profile/Profile.jsx
 import "./profile.scss";
 import { useState, useRef, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
@@ -30,9 +31,10 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       const res = await axios.get(`/users/${id}`);
-      setUser(res.data);
+      setUser(res.data || {});
     } catch (err) {
       console.error("Error fetching user:", err);
+      setUser({});
     }
   };
 
@@ -45,7 +47,7 @@ const Profile = () => {
     const fetchPostsCount = async () => {
       try {
         const res = await axios.get(`/posts?userId=${id}`);
-        setPostsCount(res.data.length);
+        setPostsCount(res.data?.length || 0);
       } catch (err) {
         console.error("Error fetching posts count:", err);
       }
@@ -61,7 +63,7 @@ const Profile = () => {
         const res = await axios.get(`/followers/check/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setFollowing(res.data.following);
+        setFollowing(res.data?.following || false);
       } catch (err) {
         console.error("Error checking follow status:", err);
       }
@@ -80,8 +82,10 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFollowing(false);
-        // Update counts dynamically
-        updatedUser.followers_count = (updatedUser.followers_count || 1) - 1;
+        updatedUser.followers_count = Math.max(
+          0,
+          (updatedUser.followers_count || 1) - 1
+        );
       } else {
         await axios.post(
           `/followers`,
@@ -129,19 +133,19 @@ const Profile = () => {
       <div className="profileContainer">
         <div className="uInfo">
           <div className="left">
-            <a href={user.facebook_url || "http://facebook.com"}>
+            <a href={user.facebook_url || "http://facebook.com"} target="_blank">
               <FacebookTwoToneIcon fontSize="large" />
             </a>
-            <a href={user.instagram_url || "https://www.instagram.com/"}>
+            <a href={user.instagram_url || "https://www.instagram.com/"} target="_blank">
               <InstagramIcon fontSize="large" />
             </a>
-            <a href={user.linkedin_url || "https://linkedin.com"}>
+            <a href={user.linkedin_url || "https://linkedin.com"} target="_blank">
               <LinkedInIcon fontSize="large" />
             </a>
           </div>
 
           <div className="center">
-            <span>{user.name}</span>
+            <span>{user.name || "Unknown User"}</span>
             <div className="batch">Batch: {user.batch || "N/A"}</div>
             <div className="info">
               <div className="item">
