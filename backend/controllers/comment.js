@@ -1,12 +1,10 @@
-import { connectDB } from "../connect.js";
-let db;
-connectDB().then((c) => (db = c));
+import { pool } from "../connect.js"; // <-- use pool instead of single connection
 
 // ✅ Get comments for a post
 export const getCommentsByPost = async (req, res) => {
   const postId = req.params.postId;
   try {
-    const [comments] = await db.query(
+    const [comments] = await pool.execute(
       `SELECT c.*, u.name, u.profile_img AS profilePicture
        FROM comments c
        JOIN users u ON c.user_id = u.id
@@ -32,19 +30,19 @@ export const addComment = async (req, res) => {
   const userId = req.userId; // from verifyToken middleware
 
   try {
-    const [result] = await db.query(
+    const [result] = await pool.execute(
       "INSERT INTO comments (post_id, user_id, comment_text) VALUES (?, ?, ?)",
       [postId, userId, comment_text]
     );
 
     // ✅ Update comments_count in posts
-    await db.query(
+    await pool.execute(
       "UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?",
       [postId]
     );
 
     // ✅ Fetch inserted comment with user details
-    const [newComment] = await db.query(
+    const [newComment] = await pool.execute(
       `SELECT c.*, u.name, u.profile_img AS profilePicture
        FROM comments c
        JOIN users u ON c.user_id = u.id
