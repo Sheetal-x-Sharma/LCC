@@ -47,9 +47,7 @@ const Navbar = () => {
         const res = await API.get("/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        // Exclude notifications where actor_id === current user
-        const filtered = res.data.filter(n => n.actor_id !== userData?.id);
+        const filtered = res.data.filter((n) => n.actor_id !== userData?.id);
         setNotifications(filtered);
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
@@ -69,9 +67,8 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Delete single notification (optimistic update)
   const handleDeleteNotification = async (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id)); // immediate update
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
     try {
       await API.delete(`/notifications/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -81,9 +78,8 @@ const Navbar = () => {
     }
   };
 
-  // Clear all notifications (optimistic update)
   const handleClearAll = async () => {
-    setNotifications([]); // immediate update
+    setNotifications([]);
     try {
       await API.delete("/notifications", {
         headers: { Authorization: `Bearer ${token}` },
@@ -93,16 +89,31 @@ const Navbar = () => {
     }
   };
 
+  // ✅ Safe utility
   const getProfileImage = (user) => {
-    if (!user) return ProfileFallback;
-    if (user.profile_img?.includes("lh3.googleusercontent.com")) {
-      return `${API_URL}/api/proxy-image?url=${encodeURIComponent(user.profile_img)}`;
+    if (
+      !user ||
+      !user.profile_img ||
+      user.profile_img === "null" ||
+      user.profile_img === "undefined"
+    ) {
+      return ProfileFallback;
     }
-    if (user.profile_img?.startsWith("/uploads/")) {
-      return `${API_URL}${user.profile_img}`;
+
+    const img = user.profile_img;
+
+    if (img.includes("lh3.googleusercontent.com")) {
+      return `${API_URL}/api/proxy-image?url=${encodeURIComponent(img)}`;
     }
-    return user.profile_img || ProfileFallback;
+
+    if (img.startsWith("/uploads/")) {
+      return `${API_URL}${img}`;
+    }
+
+    return img || ProfileFallback;
   };
+
+  const profileImg = getProfileImage(userData);
 
   return (
     <div className="navbar">
@@ -168,7 +179,7 @@ const Navbar = () => {
         <div className="user">
           {userData ? (
             <NavLink to={`/ownProfile/${userData.id}`} className="user-link">
-              <img src={getProfileImage(userData)} alt={userData.name || "User"} />
+              <img src={profileImg} alt={userData.name || "User"} />
               <span>{userData.name || "User"}</span>
             </NavLink>
           ) : (
