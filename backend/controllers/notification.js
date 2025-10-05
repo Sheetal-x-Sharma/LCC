@@ -1,12 +1,11 @@
-import { connectDB } from "../connect.js";
+import { pool } from "../connect.js"; // use pool instead of single connection
 
 // Get notifications for the current user (excluding self)
 export const getNotifications = async (req, res) => {
   try {
-    const db = await connectDB();
     const userId = req.userId;
 
-    const [rows] = await db.execute(
+    const [rows] = await pool.execute(
       `
       SELECT 
         n.id, 
@@ -26,7 +25,7 @@ export const getNotifications = async (req, res) => {
 
     res.status(200).json(rows);
   } catch (err) {
-    console.error(err);
+    console.error("Get notifications error:", err);
     res.status(500).json({ message: "Failed to fetch notifications" });
   }
 };
@@ -34,11 +33,10 @@ export const getNotifications = async (req, res) => {
 // Delete single notification
 export const deleteNotification = async (req, res) => {
   try {
-    const db = await connectDB();
     const notificationId = req.params.id;
     const userId = req.userId;
 
-    const [result] = await db.execute(
+    const [result] = await pool.execute(
       "DELETE FROM notifications WHERE id = ? AND user_id = ?",
       [notificationId, userId]
     );
@@ -48,7 +46,7 @@ export const deleteNotification = async (req, res) => {
 
     res.status(200).json({ message: "Notification deleted" });
   } catch (err) {
-    console.error(err);
+    console.error("Delete notification error:", err);
     res.status(500).json({ message: "Failed to delete notification" });
   }
 };
@@ -56,13 +54,12 @@ export const deleteNotification = async (req, res) => {
 // Delete all notifications for the user
 export const deleteAllNotifications = async (req, res) => {
   try {
-    const db = await connectDB();
     const userId = req.userId;
 
-    await db.execute("DELETE FROM notifications WHERE user_id = ?", [userId]);
+    await pool.execute("DELETE FROM notifications WHERE user_id = ?", [userId]);
     res.status(200).json({ message: "All notifications deleted" });
   } catch (err) {
-    console.error(err);
+    console.error("Delete all notifications error:", err);
     res.status(500).json({ message: "Failed to delete notifications" });
   }
 };
