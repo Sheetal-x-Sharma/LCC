@@ -69,24 +69,34 @@ const OwnProfile = () => {
       });
 
       setEditing(false);
+
       const updated = await axios.get(`http://localhost:8800/api/users/${currentUser.id}`);
       setUser(updated.data);
     } catch (err) {
       console.error("Update error:", err);
+      alert("Failed to update profile.");
     }
   };
 
   if (!user) return <div>Loading profile...</div>;
 
+  const getProfileImg = () => {
+    if (profileFile) return URL.createObjectURL(profileFile);
+    if (user.profile_img) return `http://localhost:8800${user.profile_img}`;
+    return Profileimg;
+  };
+
+  const getCoverImg = () => {
+    if (coverFile) return URL.createObjectURL(coverFile);
+    if (user.cover_img) return `http://localhost:8800${user.cover_img}`;
+    return Cover;
+  };
+
   return (
     <div className="profile">
       {/* Cover + Profile Images */}
       <div className="images">
-        <img
-          src={coverFile ? URL.createObjectURL(coverFile) : user.cover_img ? `http://localhost:8800${user.cover_img}` : Cover}
-          alt="Cover"
-          className="cover"
-        />
+        <img src={getCoverImg()} alt="Cover" className="cover" />
         {editing && (
           <>
             <label htmlFor="coverUpload" className="coverUploadLabel"><CameraAltIcon /></label>
@@ -94,11 +104,7 @@ const OwnProfile = () => {
           </>
         )}
 
-        <img
-          src={profileFile ? URL.createObjectURL(profileFile) : user.profile_img ? `http://localhost:8800${user.profile_img}` : Profileimg}
-          alt="Profile"
-          className="profilePic"
-        />
+        <img src={getProfileImg()} alt="Profile" className="profilePic" />
         {editing && (
           <>
             <label htmlFor="profileUpload" className="profileUploadLabel"><CameraAltIcon /></label>
@@ -134,11 +140,11 @@ const OwnProfile = () => {
             <div className="info">
               <div className="item">
                 <PlaceIcon />
-                {editing ? <input value={location} onChange={(e) => setLocation(e.target.value)} /> : <span>{user.city}</span>}
+                {editing ? <input value={location} onChange={(e) => setLocation(e.target.value)} /> : <span>{user.city || "N/A"}</span>}
               </div>
               <div className="item">
                 <LanguageIcon />
-                {editing ? <input value={website} onChange={(e) => setWebsite(e.target.value)} /> : <span>{user.personal_website}</span>}
+                {editing ? <input value={website} onChange={(e) => setWebsite(e.target.value)} /> : <span>{user.personal_website || "N/A"}</span>}
               </div>
             </div>
 
@@ -149,7 +155,6 @@ const OwnProfile = () => {
               <div className="bio">{user.bio || "No bio added yet."}</div>
             )}
 
-            {/* Edit/Save Button */}
             <button onClick={editing ? handleSave : () => setEditing(true)}>
               {editing ? "Save Changes" : "Edit Profile"}
             </button>
@@ -162,30 +167,25 @@ const OwnProfile = () => {
 
           {/* Stats */}
           <div className="stats">
-           <span><strong>{user.posts_count || 0}</strong><br />Posts</span>
-
+            <span><strong>{user.posts_count || 0}</strong><br />Posts</span>
             <span><strong>{user.followers_count || 0}</strong><br />Followers</span>
             <span><strong>{user.following_count || 0}</strong><br />Following</span>
             <span><strong>{user.dedications_count || 0}</strong><br />Dedications</span>
           </div>
         </div>
 
-        {/* About Section (Editable) */}
+        {/* About Section */}
         <div className="about">
           <h3>About</h3>
           {editing ? (
-            <textarea
-              className="aboutEdit"
-              placeholder="Tell us more about yourself..."
-              value={about}
-              onChange={(e) => setAbout(e.target.value)}
-            />
+            <textarea className="aboutEdit" placeholder="Tell us more about yourself..." value={about} onChange={(e) => setAbout(e.target.value)} />
           ) : (
             <p>{user.about || "No description added yet."}</p>
           )}
         </div>
 
-        <Posts />
+        {/* User's Posts */}
+        <Posts userId={currentUser?.id} />
       </div>
     </div>
   );
