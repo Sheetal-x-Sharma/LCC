@@ -1,20 +1,22 @@
-import { connectDB } from "../connect.js";
+import { pool } from "../connect.js"; // use pool for persistent connections
 import jwt from "jsonwebtoken";
 import moment from "moment";
 
-const dbPromise = connectDB();
+// Middleware-like helper to get userId from JWT
+const getUserIdFromToken = (req) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) throw new Error("Not logged in");
+  const token = authHeader.split(" ")[1];
+  if (!token) throw new Error("Not logged in");
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  return decoded.id;
+};
 
 // GET STORIES
 export const getStories = async (req, res) => {
   try {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader) return res.status(401).json("Not logged in!");
-    const token = authHeader.split(" ")[1];
-    if (!token) return res.status(401).json("Not logged in!");
+    getUserIdFromToken(req); // will throw if invalid
 
-    jwt.verify(token, process.env.JWT_SECRET);
-
-    const db = await dbPromise;
     const q = `
       SELECT s.*, u.name, u.profile_img 
       FROM stories AS s 
@@ -22,56 +24,47 @@ export const getStories = async (req, res) => {
       ORDER BY s.created_at DESC
       LIMIT 10
     `;
-    const [data] = await db.query(q);
+    const [data] = await pool.execute(q);
     res.status(200).json(data);
   } catch (err) {
     console.error(err);
-    res.status(403).json("Token is not valid!");
+    res.status(err.message === "Not logged in" ? 401 : 500).json(err.message);
   }
 };
 
 // ADD STORY
 export const addStory = async (req, res) => {
   try {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader) return res.status(401).json("Not logged in!");
-    const token = authHeader.split(" ")[1];
-    const userInfo = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = getUserIdFromToken(req);
 
     const { img_url, media_type } = req.body;
-
     if (!img_url) return res.status(400).json("File URL is required");
     if (!media_type || !["image", "video"].includes(media_type))
       return res.status(400).json("media_type must be 'image' or 'video'");
 
-    const db = await dbPromise;
     const expiresAt = moment().add(24, "hours").format("YYYY-MM-DD HH:mm:ss");
 
-    await db.query(
+    await pool.execute(
       "INSERT INTO stories (user_id, img_url, media_type, created_at, expires_at) VALUES (?, ?, ?, NOW(), ?)",
-      [userInfo.id, img_url, media_type, expiresAt]
+      [userId, img_url, media_type, expiresAt]
     );
 
     res.status(200).json("Story has been added!");
   } catch (err) {
     console.error(err);
-    res.status(500).json("Something went wrong!");
+    res.status(err.message === "Not logged in" ? 401 : 500).json("Something went wrong!");
   }
 };
 
 // DELETE STORY
 export const deleteStory = async (req, res) => {
   try {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader) return res.status(401).json("Not logged in!");
-    const token = authHeader.split(" ")[1];
-    const userInfo = jwt.verify(token, process.env.JWT_SECRET);
-
+    const userId = getUserIdFromToken(req);
     const storyId = req.params.id;
-    const db = await dbPromise;
-    const [result] = await db.query(
+
+    const [result] = await pool.execute(
       "DELETE FROM stories WHERE id = ? AND user_id = ?",
-      [storyId, userInfo.id]
+      [storyId, userId]
     );
 
     if (result.affectedRows === 0)
@@ -80,6 +73,6 @@ export const deleteStory = async (req, res) => {
     res.status(200).json("Story deleted successfully!");
   } catch (err) {
     console.error(err);
-    res.status(500).json("Something went wrong!");
+    res.status(err.message === "Not logged in" ? 401 : 500).json("Something went wrong!");
   }
 };
