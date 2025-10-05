@@ -1,0 +1,24 @@
+
+C:\Users\Sheetal\Desktop\practice\lnmiit_campus_connect_platform\backend
+├── config
+├── connect.js
+├── controllers
+├── final_db.sql
+├── index.js
+├── lcc_database.sql
+├── middleware
+├── package-lock.json
+├── package.json
+├── public
+├── routes
+├── tree.txt
+├── tree1.txt
+├── uploads
+└── yarn.lock
+
+directory: 6 file: 9
+
+ignored: directory (1)
+
+
+[2K[1G

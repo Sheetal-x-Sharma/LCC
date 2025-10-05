@@ -1,0 +1,91 @@
+@import "../../style.scss";
+
+.groups {
+  @include themify($themes) {
+    background-color: themed("bgSoft");
+    padding: 20px;
+
+    .search-bar {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+      width: 40%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid themed("border");
+      background-color: themed("bg");
+      color: themed("textColor");
+     
+      .searchIcon {
+        color: themed("textColorSoft");
+      }
+
+      input{
+        border: none;
+        width: 40%;
+        padding-right: 10px;
+        background-color: themed("bg");
+        color: themed("textColor");
+      }
+    }
+
+    .section {
+      margin-bottom: 50px;
+
+      h2 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: themed("textColor");
+      }
+
+      .scroll-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+
+        .scroll-btn {
+          background: themed("bg");
+          border: none;
+          color: themed("textColor");
+          font-size: 24px;
+          cursor: pointer;
+          padding: 5px 10px;
+          transition: all 0.3s ease-in-out;
+          position: absolute;
+          z-index: 2;
+          top: 50%;
+          transform: translateY(-50%);
+          opacity: 0.7;
+
+          &:hover {
+            background: themed("bgSoft");
+            opacity: 1;
+          }
+        }
+
+        .left {
+          left: 0;
+        }
+
+        .right {
+          right: 0;
+        }
+
+        .group-list {
+          display: flex;
+          padding-bottom: 20px;
+          padding-left: 10px;
+          padding-right: 10px;
+          padding-top: 10px;
+          gap: 15px;
+          transition: transform 0.4s ease-in-out;
+          width: 100%;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,192 @@
+@import "../../style.scss";
+
+
+.register-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+
+.register-content {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 30px 40px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: white;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+
+  .register-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+
+    h2 {
+      font-size: 26px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+
+    .back-button {
+      background: transparent;
+      border: none;
+      color: #868787;
+      font-size: 16px;
+      cursor: pointer;
+      transition: color 0.3s ease;
+
+
+      &:hover {
+        color: #6a65fb;
+      }
+    }
+  }
+
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+
+    label {
+      font-size: 15px;
+      font-weight: 500;
+
+
+      span {
+        color: #ff6b6b;
+      }
+    }
+
+
+    option {
+      color: black;
+    }
+
+
+    input,
+    select,
+    textarea {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      font-size: 14px;
+      transition: border 0.3s ease, background 0.3s ease;
+
+
+      &:focus {
+        outline: none;
+        background: transparent;
+        border: 2px solid;
+        border-image: linear-gradient(45deg, #00DDE0, #6a65fb) 1;
+        color: #fff;
+      }
+    }
+
+
+    select {
+      padding-right: 40px; // 👈 extra space for the arrow
+      appearance: none; // 👈 remove default arrow
+      background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); // 👈 clean white arrow
+      background-repeat: no-repeat;
+      background-position: right 14px center; // 👈 moved a bit inside
+      background-size: 16px;
+    }
+
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+
+    .location-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+   
+      input {
+        flex: 1;
+        min-width: 0;
+      }
+    }    
+
+
+    .terms {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      margin-top: 10px;
+
+
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #00dde0;
+        cursor: pointer;
+      }
+
+
+      .terms-label {
+        color: rgba(255, 255, 255, 0.9);
+
+
+        a {
+          color: #00dde0;
+          text-decoration: underline;
+        }
+
+
+        span {
+          color: #ff6b6b;
+          margin-left: 4px;
+        }
+      }
+    }
+
+
+    .submit-btn {
+      margin-top: 10px;
+      background: linear-gradient(45deg, #00DDE0 30%, #6a65fb 100%);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+
+      &:hover {
+        background: linear-gradient(45deg, #00DDE0 30%, #6a65fb 100%);
+      }
+    }
+  }
+}
+
+

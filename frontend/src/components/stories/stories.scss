@@ -1,0 +1,210 @@
+@import "../../style.scss";
+
+.stories-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .scroll-btn {
+    border: none;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 24px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    z-index: 10;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  .scroll-btn.left {
+    margin-right: 5px;
+  }
+
+  .scroll-btn.right {
+    margin-left: 5px;
+  }
+}
+
+.stories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+  width: 100%;
+
+  .story {
+    flex: 0 0 200px; // 3–4 stories visible depending on container
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background: #f0f0f0;
+    cursor: pointer;
+
+    img,
+    video {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #e0e0e0;
+    }
+
+    span {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      color: white;
+      font-weight: 500;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    button {
+      position: absolute;
+      bottom: 40px;
+      left: 10px;
+      color: white;
+      background-color: #5271ff;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    /* Upload icon overlay only for first story */
+    &:first-child img:last-child {
+      position: absolute;
+      bottom: 35px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: white;
+      padding: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      object-fit: contain;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+/* ===== Modal ===== */
+.story-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(3px);
+
+  .modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    width: 320px;
+
+    h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .type-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+
+      button {
+        flex: 1;
+        padding: 10px 0;
+        border: none;
+        border-radius: 5px;
+        background: #f0f0f0;
+        color: #333;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.active {
+          background: #5271ff;
+          color: white;
+        }
+
+        &:hover {
+          background: #5271ff;
+          color: white;
+        }
+      }
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 10px auto;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: #e0e0e0;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background: #5271ff;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: #3a5edd;
+        }
+
+        &:last-child {
+          background: gray;
+          &:hover {
+            background: #555;
+          }
+        }
+      }
+    }
+  }
+}

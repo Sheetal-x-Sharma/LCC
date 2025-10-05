@@ -1,0 +1,245 @@
+@import "../../style.scss";
+
+
+.hatDedication {
+  @include themify($themes) {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background: themed("bgSoft");
+    color: themed("textColor");
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+
+
+    @media (max-width: 768px) {
+      padding: 15px;
+    }
+
+
+    .infoSection {
+      background: themed("bg");
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+
+
+      .infoIcon {
+        font-size: 28px;
+        color: #ffcc00;
+      }
+
+
+      h3 {
+        font-size: 18px;
+        margin: 10px 0;
+      }
+
+
+      p {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        gap: 8px;
+      }
+
+
+      .icon {
+        font-size: 18px;
+        color: #6a65fb;
+      }
+    }
+
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+
+
+      .profilePic {
+        width: 110px;
+        height: 120px;
+        border-radius: 50%;
+      }
+
+
+      h2 {
+        font-size: 22px;
+      }
+
+
+      p {
+        font-size: 16px;
+        color: themed("textColorSoft");
+      }
+    }
+
+
+    .dedicationForm {
+      background: themed("bg");
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+
+
+      h3 {
+        margin-bottom: 10px;
+      }
+
+
+      .error {
+        color: red;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 10px;
+
+
+        .errorIcon {
+          font-size: 18px;
+        }
+      }
+
+
+      input,
+      textarea {
+        width: 96%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid themed("border");
+        border-radius: 5px;
+        background: themed("bgSoft");
+        color: themed("textColor");
+        transition: 0.3s;
+
+
+        &:focus {
+          border-color: #6a65fb;
+          box-shadow: 0px 0px 5px rgba(106, 101, 251, 0.5);
+        }
+      }
+
+
+      button {
+        width: 20%;
+        padding: 12px;
+        background: linear-gradient(45deg, #00DDE0, #6a65fb);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+
+
+        &:hover {
+          opacity: 0.9;
+          transform: scale(1.02);
+        }
+      }
+    }
+
+
+    .dedicationsList {
+      h3 {
+        margin-bottom: 10px;
+      }
+
+
+      .dedicationItem {
+        background: themed("bg");
+        border-radius: 8px;
+        padding: 30px;
+        padding-right: 40px;
+        padding-left: 30px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        text-align: left;
+
+
+        .dedicationHeader {
+          display: flex;
+          align-items: center; // Ensures vertical alignment is centered
+          justify-content: space-between; // Spreads elements evenly across the row
+          gap: 15px; // Adjust spacing between elements
+          width: 100%; // Ensure full width utilization
+          flex-wrap: wrap; // Ensures responsiveness for smaller screens
+
+
+          .profileImage {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+          }
+
+
+          .dedicationInfo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+         
+          .hatImage {
+            width: 70px;
+            height: 70px;
+            margin-left: auto; // Pushes the hat image to the right
+          }
+
+
+          .dedicationText {
+            font-size: 16px;
+            font-weight: bold;
+            color: themed("textColor");
+ 
+            .timestamp {
+              font-size: 12px;
+              font-weight: normal;
+              color: themed("textColorSoft");
+            }
+          }
+        }
+
+
+        .dedicationMessage {
+          font-style: italic;
+          font-size: 14px;
+          color: themed("textColorSoft");
+          background: rgba(255, 255, 255, 0.1);
+          padding: 10px;
+          border-radius: 5px;
+          margin: 10px 0;
+        }
+
+
+       
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

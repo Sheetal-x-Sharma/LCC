@@ -1,0 +1,54 @@
+@import "../../style.scss";
+
+.group-card {
+  @include themify($themes) {
+    width: 200px;
+    padding: 15px;
+    background-color: themed("bg");
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    img {
+      width: 100%;
+      border-radius: 8px;
+      height: 120px;
+      object-fit: cover;
+    }
+
+    .group-info {
+      margin-top: 10px;
+      
+      h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: themed("textColorSoft");
+      }
+
+      p {
+        font-size: 14px;
+        color: themed("textColorSoft");
+        margin: 5px 0;
+      }
+
+      button {
+        margin-top: 8px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        background: linear-gradient(45deg, #00dde0 0%, #6a65fb 100%);
+        color: white;
+        cursor: pointer;
+
+        &:hover {
+          background: linear-gradient(45deg, #6a65fb 0%, #00dde0 100%);
+        }
+      }
+    }
+  }
+}

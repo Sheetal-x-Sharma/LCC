@@ -1,0 +1,207 @@
+
+@import "../../style.scss";
+
+
+.navbar {
+  @include themify($themes);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  height: 50px;
+  width: 97vw;
+  border-bottom: 1px solid themed("border");
+  position: sticky;
+  top: 0;
+  background-color: themed("bg");
+  color: themed("textColor");
+  z-index: 999;
+
+
+  .icon {
+    color: themed("textColor");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+
+    svg {
+      font-size: 24px;
+    }
+
+
+    &.logo img {
+      width: 65px;
+      height: 65px;
+      object-fit: cover;
+    }
+  }
+
+
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid themed("border");
+      border-radius: 5px;
+      padding: 5px;
+
+
+      input {
+        border: none;
+        width: 500px;
+        background-color: transparent;
+        color: themed("textColor");
+        outline: none;
+
+
+        @include mobile {
+          display: none;
+        }
+      }
+    }
+  }
+
+
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+
+    @include mobile {
+      display: none;
+    }
+
+
+    @include tablet {
+      width: 200px;
+    }
+
+
+    .notification-icon {
+      position: relative;
+
+
+      .icon-wrapper {
+        position: relative;
+        cursor: pointer;
+
+
+        svg {
+          font-size: 24px;
+        }
+      }
+
+
+      .notification-count {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: red;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        padding: 2px 5px;
+        border-radius: 50%;
+      }
+
+
+      .notifications-dropdown {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        width: 270px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        padding: 12px;
+        z-index: 1000;
+
+
+        .notification {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 14px;
+          padding: 8px 10px;
+          margin-bottom: 6px;
+          border-radius: 6px;
+          background-color: rgba(255, 255, 255, 0.05);
+          border: 1px solid themed("border");
+          color: themed("textColor");
+
+
+          .delete-icon {
+            font-size: 16px;
+            cursor: pointer;
+            color: #ff4d4f;
+
+
+            &:hover {
+              color: red;
+            }
+          }
+        }
+
+
+        .clear-link {
+          text-align: right;
+          margin-top: 10px;
+          color: gray;
+          text-decoration: underline;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+
+
+          &:hover {
+            color: gray;
+          }
+        }
+      }
+    }
+
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+
+
+      @include tablet {
+        display: none;
+      }
+
+
+      .user-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: themed("textColor");
+        text-decoration: none;
+
+
+        img {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+}
+
+

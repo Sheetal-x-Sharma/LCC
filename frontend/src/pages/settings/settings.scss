@@ -1,0 +1,129 @@
+
+
+@import "../../style.scss";
+
+
+.super {
+  @include themify($themes) {
+    background: themed("bgSoft");
+    min-height: 100vh; // Ensures it takes full screen height
+    display: flex;
+    justify-content: center;
+    align-items: center; // Centers the settings div vertically
+
+
+    .settings {
+      background: themed("bg");
+      color: themed("textColor");
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+
+    .setting-item {
+      background: themed("bg");
+      border-radius: 10px;
+      margin-bottom: 15px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      font-size: 18px;
+      width: 100%; // Ensures items span full width for alignment
+
+
+      .setting-title {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+      }
+
+
+      .setting-dropdown {
+        margin-top: 10px;
+        padding: 15px;
+        background: themed("bgSoft");
+        border-radius: 8px;
+        animation: dropdown 0.3s ease-in-out;
+
+
+        button,
+        label {
+          display: block;
+          width: 100%;
+          padding: 12px;
+          background: themed("primary");
+          color: themed("textColor");
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          text-align: center;
+          font-size: 16px;
+          opacity: 0.9;
+        }
+
+
+        button:hover {
+          opacity: 1;
+        }
+      }
+    }
+
+
+    .logout-btn {
+      width: 100%;
+      padding: 12px;
+      background: grey;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+
+    .logout-btn:hover {
+      opacity: 0.85;
+    }
+  }
+}
+
+
+// Smooth dropdown animation
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+// Ensure body and html take full height to prevent extra white space
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
