@@ -1,5 +1,5 @@
 import React from 'react';
-import './AboutTeam.scss';
+import './aboutTeam.scss';
 import teamData from './teamData';
 import { FaLinkedin, FaEnvelope } from 'react-icons/fa';
 
