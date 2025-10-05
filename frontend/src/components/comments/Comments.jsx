@@ -66,15 +66,17 @@ const Comments = ({ postId, onCommentAdded }) => {
   };
 
   const getProfileImage = (img) => {
-    if (!img) return Profileimg;
+    if (!img || img === "null" || img === "undefined") return Profileimg;
     if (img.startsWith("http")) return img;
     return `${API_URL}${img}`;
   };
 
+  const currentUserImage = currentUser ? getProfileImage(currentUser.profile_img) : Profileimg;
+
   return (
     <div className="comments">
       <div className="write">
-        <img src={getProfileImage(currentUser?.profile_img)} alt="profile" />
+        <img src={currentUserImage} alt="profile" />
         <input
           type="text"
           placeholder="write a comment"
@@ -86,7 +88,7 @@ const Comments = ({ postId, onCommentAdded }) => {
 
       {comments.map((comment) => (
         <div className="comment" key={comment.id}>
-          <img src={getProfileImage(comment.profile_img)} alt="profile" />
+          <img src={getProfileImage(comment?.profile_img)} alt="profile" />
           <div className="info">
             <span>{comment.name || "Anonymous"}</span>
             <p>{comment.comment_text}</p>
