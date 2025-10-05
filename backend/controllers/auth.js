@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import dotenv from "dotenv";
-import { pool } from "../connect.js"; // <-- use pool instead of creating a new connection
+import { pool } from "../connect.js";
 
 dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -83,8 +83,8 @@ export const googleLogin = async (req, res) => {
 
     res.cookie("access_token", tokenJWT, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production", // must be true for SameSite=None
+      sameSite: "none", // cross-site requests now work
     });
 
     res.status(200).json({
@@ -189,7 +189,7 @@ export const logout = (req, res) => {
   res.clearCookie("access_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none", // cross-origin logout
   });
   return res.status(200).json({ message: "Logged out successfully" });
 };
