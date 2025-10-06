@@ -1,7 +1,4 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/6b546292-1201-4f74-b0e8-b6dcdf83b03f" width="70" height="70" alt="LCC Logo" />&nbsp;&nbsp;
-  <strong>LNMIIT Campus Connect (LCC)</strong>
-</p>
+# <img src="https://github.com/user-attachments/assets/6b546292-1201-4f74-b0e8-b6dcdf83b03f" width="70" height="70" alt="LCC Logo" />&nbsp; **LNMIIT Campus Connect (LCC)**
 
 
 
