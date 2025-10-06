@@ -50,7 +50,7 @@ cd frontend
 
 ## 🌍 Live Demo
 
-- 🔗 **Frontend:** [https://lcc-frontend.vercel.app](https://lcc-frontend.vercel.app)  
+- 🔗 **Frontend:** [https://lcc-frontend-lemon.vercel.app/](https://lcc-frontend-lemon.vercel.app/)
 - 🔗 **Backend API:** [https://lcc-backend.onrender.com](https://lcc-backend.onrender.com)
 
 ---
