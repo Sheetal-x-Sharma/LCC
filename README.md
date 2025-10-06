@@ -52,7 +52,6 @@ cd frontend
 
 - 🔗 **Frontend:** [https://lcc-frontend-lemon.vercel.app/](https://lcc-frontend-lemon.vercel.app/)
 - 🔗 **Backend API:** [https://lcc-backend.onrender.com](https://lcc-backend.onrender.com)
-
 ---
 
 ## 📸 Preview
