@@ -31,7 +31,7 @@ Developed using **React**, **Node.js**, **Express**, and **MySQL** — with auth
 
 ### 🧩 **1️⃣ Clone the Repository**
 ```bash
-git clone https://github.com/your-username/LCC.git
+git clone https://github.com/Sheetal-x-Sharma/LCC.git
 cd LCC
 ```
 
@@ -44,7 +44,7 @@ cd backend
 
  **Frontend**
  ```bash
-cd ../frontend
+cd frontend
  npm install
  ```
 
@@ -77,15 +77,10 @@ If you'd like to improve this project:
 ## 🧑‍💻 Developer
 
 - 👤 **Sheetal Sharma**  
-- 📧 [your-email@example.com](mailto:your-email@example.com)  
+- 📧 [sheetalsharmaoct2003@gmail.com](mailto:sheetalsharmaoct2003@gmail.com)  
 - 🌐 [GitHub Profile](https://github.com/Sheetal-x-Sharma)
 
 ---
-
-## 📄 License
-
-This project is licensed under the **MIT License**.  
-You’re free to use, modify, and distribute this software with attribution.
 
 ---
 
