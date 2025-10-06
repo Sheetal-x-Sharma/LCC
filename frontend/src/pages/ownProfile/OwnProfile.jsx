@@ -30,8 +30,9 @@ const OwnProfile = () => {
   const [profileFile, setProfileFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL; // ✅ Use env variable
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
+  // ------------------ FETCH USER DATA ------------------
   useEffect(() => {
     if (!currentUser) return;
     const fetchUser = async () => {
@@ -54,7 +55,7 @@ const OwnProfile = () => {
     fetchUser();
   }, [currentUser, API_BASE]);
 
-  // Save edited profile
+  // ------------------ SAVE EDITED PROFILE ------------------
   const handleSave = async () => {
     try {
       const formData = new FormData();
@@ -87,16 +88,21 @@ const OwnProfile = () => {
 
   if (!user) return <div>Loading profile...</div>;
 
+  // ✅ Helper to handle both Cloudinary and local images
+  const resolveImageUrl = (path, fallback) => {
+    if (!path) return fallback;
+    if (path.startsWith("http")) return path; // Cloudinary or any external URL
+    return API_BASE.replace("/api", "") + path; // Local backend upload
+  };
+
   const getProfileImg = () => {
     if (profileFile) return URL.createObjectURL(profileFile);
-    if (user.profile_img) return `${API_BASE.replace("/api", "")}${user.profile_img}`;
-    return Profileimg;
+    return resolveImageUrl(user.profile_img, Profileimg);
   };
 
   const getCoverImg = () => {
     if (coverFile) return URL.createObjectURL(coverFile);
-    if (user.cover_img) return `${API_BASE.replace("/api", "")}${user.cover_img}`;
-    return Cover;
+    return resolveImageUrl(user.cover_img, Cover);
   };
 
   return (
@@ -106,16 +112,32 @@ const OwnProfile = () => {
         <img src={getCoverImg()} alt="Cover" className="cover" />
         {editing && (
           <>
-            <label htmlFor="coverUpload" className="coverUploadLabel"><CameraAltIcon /></label>
-            <input id="coverUpload" type="file" accept="image/*" className="coverUpload" onChange={(e) => setCoverFile(e.target.files[0])} />
+            <label htmlFor="coverUpload" className="coverUploadLabel">
+              <CameraAltIcon />
+            </label>
+            <input
+              id="coverUpload"
+              type="file"
+              accept="image/*"
+              className="coverUpload"
+              onChange={(e) => setCoverFile(e.target.files[0])}
+            />
           </>
         )}
 
         <img src={getProfileImg()} alt="Profile" className="profilePic" />
         {editing && (
           <>
-            <label htmlFor="profileUpload" className="profileUploadLabel"><CameraAltIcon /></label>
-            <input id="profileUpload" type="file" accept="image/*" className="profileUpload" onChange={(e) => setProfileFile(e.target.files[0])} />
+            <label htmlFor="profileUpload" className="profileUploadLabel">
+              <CameraAltIcon />
+            </label>
+            <input
+              id="profileUpload"
+              type="file"
+              accept="image/*"
+              className="profileUpload"
+              onChange={(e) => setProfileFile(e.target.files[0])}
+            />
           </>
         )}
       </div>
@@ -127,15 +149,39 @@ const OwnProfile = () => {
           <div className="left">
             {editing ? (
               <div className="socialInputs">
-                <input placeholder="Facebook URL" value={facebook} onChange={(e) => setFacebook(e.target.value)} />
-                <input placeholder="Instagram URL" value={instagram} onChange={(e) => setInstagram(e.target.value)} />
-                <input placeholder="LinkedIn URL" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
+                <input
+                  placeholder="Facebook URL"
+                  value={facebook}
+                  onChange={(e) => setFacebook(e.target.value)}
+                />
+                <input
+                  placeholder="Instagram URL"
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value)}
+                />
+                <input
+                  placeholder="LinkedIn URL"
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                />
               </div>
             ) : (
               <div className="socialIcons">
-                {facebook && <a href={facebook} target="_blank" rel="noreferrer"><FacebookTwoToneIcon fontSize="large" /></a>}
-                {instagram && <a href={instagram} target="_blank" rel="noreferrer"><InstagramIcon fontSize="large" /></a>}
-                {linkedin && <a href={linkedin} target="_blank" rel="noreferrer"><LinkedInIcon fontSize="large" /></a>}
+                {facebook && (
+                  <a href={facebook} target="_blank" rel="noreferrer">
+                    <FacebookTwoToneIcon fontSize="large" />
+                  </a>
+                )}
+                {instagram && (
+                  <a href={instagram} target="_blank" rel="noreferrer">
+                    <InstagramIcon fontSize="large" />
+                  </a>
+                )}
+                {linkedin && (
+                  <a href={linkedin} target="_blank" rel="noreferrer">
+                    <LinkedInIcon fontSize="large" />
+                  </a>
+                )}
               </div>
             )}
           </div>
@@ -147,17 +193,35 @@ const OwnProfile = () => {
             <div className="info">
               <div className="item">
                 <PlaceIcon />
-                {editing ? <input value={location} onChange={(e) => setLocation(e.target.value)} /> : <span>{user.city || "N/A"}</span>}
+                {editing ? (
+                  <input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                ) : (
+                  <span>{user.city || "N/A"}</span>
+                )}
               </div>
               <div className="item">
                 <LanguageIcon />
-                {editing ? <input value={website} onChange={(e) => setWebsite(e.target.value)} /> : <span>{user.personal_website || "N/A"}</span>}
+                {editing ? (
+                  <input
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                  />
+                ) : (
+                  <span>{user.personal_website || "N/A"}</span>
+                )}
               </div>
             </div>
 
             {/* Bio */}
             {editing ? (
-              <textarea placeholder="Write a short bio..." value={bio} onChange={(e) => setBio(e.target.value)} />
+              <textarea
+                placeholder="Write a short bio..."
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
             ) : (
               <div className="bio">{user.bio || "No bio added yet."}</div>
             )}
@@ -169,15 +233,33 @@ const OwnProfile = () => {
 
           {/* Right: Email */}
           <div className="right">
-            <a href={`mailto:${user.email}`}><EmailOutlinedIcon /></a>
+            <a href={`mailto:${user.email}`}>
+              <EmailOutlinedIcon />
+            </a>
           </div>
 
           {/* Stats */}
           <div className="stats">
-            <span><strong>{user.posts_count || 0}</strong><br />Posts</span>
-            <span><strong>{user.followers_count || 0}</strong><br />Followers</span>
-            <span><strong>{user.following_count || 0}</strong><br />Following</span>
-            <span><strong>{user.dedications_count || 0}</strong><br />Dedications</span>
+            <span>
+              <strong>{user.posts_count || 0}</strong>
+              <br />
+              Posts
+            </span>
+            <span>
+              <strong>{user.followers_count || 0}</strong>
+              <br />
+              Followers
+            </span>
+            <span>
+              <strong>{user.following_count || 0}</strong>
+              <br />
+              Following
+            </span>
+            <span>
+              <strong>{user.dedications_count || 0}</strong>
+              <br />
+              Dedications
+            </span>
           </div>
         </div>
 
@@ -185,7 +267,12 @@ const OwnProfile = () => {
         <div className="about">
           <h3>About</h3>
           {editing ? (
-            <textarea className="aboutEdit" placeholder="Tell us more about yourself..." value={about} onChange={(e) => setAbout(e.target.value)} />
+            <textarea
+              className="aboutEdit"
+              placeholder="Tell us more about yourself..."
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+            />
           ) : (
             <p>{user.about || "No description added yet."}</p>
           )}
