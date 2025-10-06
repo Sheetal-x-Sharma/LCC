@@ -26,7 +26,7 @@ const Profile = () => {
   const [postsCount, setPostsCount] = useState(0);
   const menuRef = useRef(null);
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL; // ✅ Use env variable
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
   // ------------------ FETCH USER ------------------
   const fetchUserData = async () => {
@@ -84,10 +84,7 @@ const Profile = () => {
           withCredentials: true,
         });
         setFollowing(false);
-        updatedUser.followers_count = Math.max(
-          0,
-          (updatedUser.followers_count || 1) - 1
-        );
+        updatedUser.followers_count = Math.max(0, (updatedUser.followers_count || 1) - 1);
       } else {
         await axios.post(
           `${API_BASE}/followers`,
@@ -117,14 +114,21 @@ const Profile = () => {
 
   if (!user) return <div>Loading profile...</div>;
 
-  const getProfileImg = () => (user.profile_img ? API_BASE.replace("/api", "") + user.profile_img : Profileimg);
-  const getCoverImg = () => (user.cover_img ? API_BASE.replace("/api", "") + user.cover_img : Cover);
+  // ✅ Helper: handles both Cloudinary & local URLs
+  const resolveImageUrl = (path, fallback) => {
+    if (!path) return fallback;
+    if (path.startsWith("http")) return path; // already full Cloudinary URL
+    return API_BASE.replace("/api", "") + path; // local uploads
+  };
+
+  const profileImgUrl = resolveImageUrl(user.profile_img, Profileimg);
+  const coverImgUrl = resolveImageUrl(user.cover_img, Cover);
 
   return (
     <div className="profile">
       <div className="images">
-        <img src={getCoverImg()} alt="Cover" className="cover" />
-        <img src={getProfileImg()} alt="Profile" className="profilePic" />
+        <img src={coverImgUrl} alt="Cover" className="cover" />
+        <img src={profileImgUrl} alt="Profile" className="profilePic" />
       </div>
 
       <div className="profileContainer">
