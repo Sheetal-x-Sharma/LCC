@@ -1,5 +1,5 @@
 
-# <img width="5" height="4" alt="image" src="https://github.com/user-attachments/assets/6b546292-1201-4f74-b0e8-b6dcdf83b03f" />🌐 **LNMIIT Campus Connect (LCC)**
+# <img width="50" height="40" alt="image" src="https://github.com/user-attachments/assets/6b546292-1201-4f74-b0e8-b6dcdf83b03f" />🌐 **LNMIIT Campus Connect (LCC)**
 
 A **full-stack social networking platform** built for **LNMIIT students** to connect, share posts, and collaborate.  
 Developed using **React**, **Node.js**, **Express**, and **MySQL** — with authentication, image uploads, and a responsive UI.
