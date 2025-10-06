@@ -91,20 +91,24 @@ const upload = multer({
 });
 
 // -------------------- UPLOAD ROUTE --------------------
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "File not found" });
+app.post("/api/upload", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "File not found" });
 
-  const localPath = `/uploads/${req.file.filename}`;
-  res.status(200).json({ fileUrl: localPath });
-
-  cloudinary.uploader
-    .upload(req.file.path, {
+    // ⏳ Upload to Cloudinary first
+    const result = await cloudinary.uploader.upload(req.file.path, {
       resource_type: req.file.mimetype.startsWith("video") ? "video" : "image",
       folder: "campus_connect",
-    })
-    .then((result) => console.log("✅ Cloud upload success:", result.secure_url))
-    .catch((err) => console.error("❌ Cloud upload failed:", err.message));
+    });
+
+    // ✅ Return Cloudinary URL (permanent)
+    return res.status(200).json({ fileUrl: result.secure_url });
+  } catch (err) {
+    console.error("❌ Upload failed:", err);
+    return res.status(500).json({ error: "Upload failed" });
+  }
 });
+
 
 // -------------------- GOOGLE IMAGE PROXY --------------------
 app.get("/api/proxy-image", async (req, res) => {
