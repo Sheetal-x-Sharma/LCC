@@ -53,29 +53,36 @@ const Stories = () => {
     setPreviewUrl(URL.createObjectURL(file));
   };
 
- const handleUpload = async () => {
-  if (!selectedFile) return alert("Please select a file");
+  const handleUpload = async () => {
+    if (!selectedFile) return alert("Please select a file first");
 
-  const formData = new FormData();
-  formData.append("file", selectedFile);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
-  try {
-    // Optionally, you can show a loading spinner here
-    await API.post("/stories", formData, {
-      headers: { Authorization: "Bearer " + token },
-    });
+    try {
+      const res = await API.post("/stories", formData, {
+        headers: { Authorization: "Bearer " + token },
+      });
 
-    // Refresh stories
-    await fetchStories();
+      if (res.data?.fileUrl) {
+        // ✅ Add the new story immediately to UI
+        const newStory = {
+          id: Date.now(),
+          name: currentUser?.name || "You",
+          profile_img: currentUser?.profile_img,
+          img_url: res.data.fileUrl,
+          media_type: res.data.media_type,
+        };
+        setStories((prev) => [newStory, ...prev]);
+      }
 
-    // ✅ Close modal immediately after successful upload
-    handleCloseModal();
-  } catch (err) {
-    console.error("Upload failed:", err);
-    alert("Upload failed!");
-  }
-};
-
+      handleCloseModal();
+      alert("Story uploaded successfully!");
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload failed. Please try again!");
+    }
+  };
 
   const scrollLeft = () =>
     scrollRef.current.scrollBy({ left: -250, behavior: "smooth" });
@@ -83,7 +90,6 @@ const Stories = () => {
   const scrollRight = () =>
     scrollRef.current.scrollBy({ left: 250, behavior: "smooth" });
 
-  // ✅ Safe profile image resolver
   const getProfileImage = (user) => {
     if (!user) return ProfileFallback;
 
@@ -105,7 +111,7 @@ const Stories = () => {
       </button>
 
       <div className="stories" ref={scrollRef}>
-        {/* ✅ Add Story Card (safe) */}
+        {/* ✅ Add Story Card */}
         <div className="story" onClick={handleOpenModal}>
           <img
             src={getProfileImage(currentUser)}
@@ -115,19 +121,15 @@ const Stories = () => {
           <img src={upload} alt="upload" />
         </div>
 
-        {/* Render stories */}
+        {/* ✅ Render Stories */}
         {loading
           ? "Loading stories..."
           : stories.map((story) => (
               <div className="story" key={story.id}>
                 {story.media_type === "video" ? (
-                  <video
-                    src={`${API_URL}${story.img_url}`}
-                    controls
-                    preload="metadata"
-                  />
+                  <video src={story.img_url} controls preload="metadata" />
                 ) : (
-                  <img src={`${API_URL}${story.img_url}`} alt="" />
+                  <img src={story.img_url} alt="story" />
                 )}
                 <span>{story.name}</span>
               </div>
@@ -138,6 +140,7 @@ const Stories = () => {
         &#10095;
       </button>
 
+      {/* ✅ Modal */}
       {showModal && (
         <div className="story-modal">
           <div className="modal-content">
