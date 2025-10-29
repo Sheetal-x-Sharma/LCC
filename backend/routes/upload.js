@@ -14,11 +14,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ===== MULTER SETUP (Memory storage - no local saving) =====
-const storage = multer.memoryStorage();
-
+// ===== MULTER (Memory storage — no local saving) =====
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     const isImageOrVideo =
       file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/");
@@ -27,48 +25,47 @@ const upload = multer({
   },
 });
 
-// ===== UPLOAD POST (images only, but auto handles videos too) =====
-router.post("/posts", upload.single("file"), async (req, res) => {
+// ===== UPLOAD SINGLE FILE (used by frontend for posts) =====
+// frontend calls POST /api/upload
+router.post("/", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "File is required" });
 
-    // Convert buffer to base64 string
-    const fileBuffer = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(fileBuffer, {
+    // Upload directly to Cloudinary
+    const result = await cloudinary.uploader.upload(fileBase64, {
       folder: "campus_connect/posts",
-      resource_type: "auto",
+      resource_type: "auto", // handles both images & videos
     });
 
     console.log("✅ Uploaded to Cloudinary:", result.secure_url);
 
-    // Return Cloudinary URL
+    // Return URL to frontend
     res.status(200).json({ fileUrl: result.secure_url });
   } catch (err) {
     console.error("❌ Cloudinary upload error:", err.message);
-    res.status(500).json({ error: "Failed to upload post" });
+    res.status(500).json({ error: "Failed to upload file", details: err.message });
   }
 });
 
-// ===== UPLOAD STORY (images or videos) =====
-router.post("/stories", upload.single("file"), async (req, res) => {
+// ===== OPTIONAL: UPLOAD STORY (if you also support stories) =====
+router.post("/story", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "File is required" });
 
-    const fileBuffer = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
 
-    const result = await cloudinary.uploader.upload(fileBuffer, {
+    const result = await cloudinary.uploader.upload(fileBase64, {
       folder: "campus_connect/stories",
       resource_type: "auto",
     });
 
     console.log("✅ Story uploaded to Cloudinary:", result.secure_url);
-
     res.status(200).json({ fileUrl: result.secure_url });
   } catch (err) {
-    console.error("❌ Cloudinary upload error:", err.message);
-    res.status(500).json({ error: "Failed to upload story" });
+    console.error("❌ Cloudinary story upload error:", err.message);
+    res.status(500).json({ error: "Failed to upload story", details: err.message });
   }
 });
 
