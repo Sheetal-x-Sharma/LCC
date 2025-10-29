@@ -19,10 +19,9 @@ import notificationsRoute from "./routes/notifications.js";
 dotenv.config();
 const app = express();
 
-// ✅ TRUST PROXY for secure cookies via Render/Vercel
 app.set("trust proxy", 1);
 
-// ✅ FIXED CORS
+// ✅ CORS
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -36,9 +35,6 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(express.json());
-app.use(cookieParser());
-
 // -------------------- STATIC FILES --------------------
 app.use(express.static("public"));
 app.use(
@@ -46,13 +42,7 @@ app.use(
   express.static(path.join(process.cwd(), "public/uploads"), {
     setHeaders: (res) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-      res.setHeader(
-        "Access-Control-Allow-Headers",
-        "Content-Type, Authorization"
-      );
       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-      res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
       res.setHeader("Cache-Control", "public, max-age=31536000");
     },
   })
@@ -65,18 +55,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// -------------------- MULTER SETUP --------------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "public/uploads/"),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
+// -------------------- MULTER SETUP (MEMORY STORAGE) --------------------
 const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       "image/jpeg",
@@ -90,25 +72,29 @@ const upload = multer({
   },
 });
 
-// -------------------- UPLOAD ROUTE --------------------
+// -------------------- UPLOAD ROUTE (Direct to Cloudinary) --------------------
 app.post("/api/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "File not found" });
 
-    // ⏳ Upload to Cloudinary first
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      resource_type: req.file.mimetype.startsWith("video") ? "video" : "image",
+    // Convert buffer → base64
+    const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(fileBase64, {
       folder: "campus_connect",
+      resource_type: "auto",
     });
 
-    // ✅ Return Cloudinary URL (permanent)
+    console.log("✅ Uploaded to Cloudinary:", result.secure_url);
+
+    // Return Cloudinary URL (save this in DB)
     return res.status(200).json({ fileUrl: result.secure_url });
   } catch (err) {
-    console.error("❌ Upload failed:", err);
-    return res.status(500).json({ error: "Upload failed" });
+    console.error("❌ Upload failed:", err.message);
+    return res.status(500).json({ error: "Upload failed", details: err.message });
   }
 });
-
 
 // -------------------- GOOGLE IMAGE PROXY --------------------
 app.get("/api/proxy-image", async (req, res) => {
