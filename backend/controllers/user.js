@@ -1,20 +1,19 @@
-import { pool } from "../connect.js"; // use pool for persistent connections
+import { pool } from "../connect.js";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
 
-// -------------------- MULTER SETUP --------------------
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    const dir = "public/uploads/";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename(req, file, cb) {
-    const uniqueName = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
+dotenv.config();
+
+// -------------------- CLOUDINARY CONFIG --------------------
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// -------------------- MULTER (MEMORY STORAGE) --------------------
+const storage = multer.memoryStorage();
 export const upload = multer({ storage });
 
 // -------------------- GET USER --------------------
@@ -22,9 +21,9 @@ export const getUser = async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    // Fetch user
     const [userData] = await pool.execute("SELECT * FROM users WHERE id = ?", [userId]);
     if (!userData.length) return res.status(404).json("User not found!");
+
     const user = userData[0];
 
     // Count posts dynamically
@@ -58,12 +57,49 @@ export const updateUser = async (req, res) => {
       instagram_url,
     } = req.body;
 
-    const profile_img = req.files?.profile_img?.[0]
-      ? `/uploads/${req.files.profile_img[0].filename}`
-      : null;
-    const cover_img = req.files?.cover_img?.[0]
-      ? `/uploads/${req.files.cover_img[0].filename}`
-      : null;
+    let profile_img = null;
+    let cover_img = null;
+
+    // Upload profile image to Cloudinary
+    if (req.files?.profile_img?.[0]) {
+      const uploadRes = await cloudinary.uploader.upload_stream(
+        { folder: "campus_connect/profile_images" },
+        async (error, result) => {
+          if (error) throw error;
+          profile_img = result.secure_url;
+        }
+      );
+      await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "campus_connect/profile_images" },
+          (error, result) => {
+            if (error) reject(error);
+            else {
+              profile_img = result.secure_url;
+              resolve(result);
+            }
+          }
+        );
+        stream.end(req.files.profile_img[0].buffer);
+      });
+    }
+
+    // Upload cover image to Cloudinary
+    if (req.files?.cover_img?.[0]) {
+      await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "campus_connect/cover_images" },
+          (error, result) => {
+            if (error) reject(error);
+            else {
+              cover_img = result.secure_url;
+              resolve(result);
+            }
+          }
+        );
+        stream.end(req.files.cover_img[0].buffer);
+      });
+    }
 
     const fields = [];
     const values = [];
