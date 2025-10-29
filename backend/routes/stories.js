@@ -17,12 +17,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Use multer memory storage — no local files
+// ✅ Use memory storage (no local files)
 const storage = multer.memoryStorage();
+
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
+    if (
+      file.mimetype.startsWith("image/") ||
+      file.mimetype.startsWith("video/")
+    ) {
       cb(null, true);
     } else {
       cb(new Error("Only images and videos are allowed"), false);
@@ -53,12 +57,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ===== ADD STORY (CLOUDINARY ONLY) =====
+// ===== ADD STORY =====
 router.post("/", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "File is required" });
 
-    // Auth check
+    // Auth
     const authHeader = req.headers["authorization"];
     if (!authHeader) return res.status(401).json("Not logged in!");
     const token = authHeader.split(" ")[1];
@@ -66,20 +70,25 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
 
-    // Convert file buffer → base64
-    const fileBase64 = Buffer.from(req.file.buffer).toString("base64");
-    const dataURI = `data:${req.file.mimetype};base64,${fileBase64}`;
-
-    // Upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(dataURI, {
-      folder: "campus_connect/stories",
-      resource_type: "auto", // auto detects image/video
+    // ✅ Upload buffer directly to Cloudinary via stream
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "campus_connect/stories",
+          resource_type: "auto",
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
     });
 
     const fileUrl = uploadResult.secure_url;
     const expiresAt = moment().add(24, "hours").format("YYYY-MM-DD HH:mm:ss");
 
-    // Save in MySQL
+    // ✅ Save in DB
     await pool.query(
       "INSERT INTO stories (user_id, img_url, media_type, created_at, expires_at) VALUES (?, ?, ?, NOW(), ?)",
       [userInfo.id, fileUrl, mediaType, expiresAt]
