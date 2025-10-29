@@ -1,14 +1,14 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import moment from "moment";
-import { pool } from "../connect.js"; // ✅ use pool instead of connectDB
+import { pool } from "../connect.js";
 
 dotenv.config();
+
+const router = express.Router();
 
 // Cloudinary config
 cloudinary.config({
@@ -17,20 +17,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const router = express.Router();
-
-// Ensure uploads/stories directory exists
-const storiesDir = path.join(process.cwd(), "public/uploads/stories");
-if (!fs.existsSync(storiesDir)) fs.mkdirSync(storiesDir, { recursive: true });
-
-// Multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, storiesDir),
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "_" + file.originalname.replace(/\s+/g, "_"));
-  },
-});
-
+// Use multer memory storage — no local files
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -57,7 +45,7 @@ router.get("/", async (req, res) => {
       ORDER BY s.created_at DESC
       LIMIT 10
     `;
-    const [data] = await pool.query(q); // ✅ use pool
+    const [data] = await pool.query(q);
     res.status(200).json(data);
   } catch (err) {
     console.error(err);
@@ -65,40 +53,45 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ===== ADD STORY =====
+// ===== ADD STORY (CLOUDINARY ONLY) =====
 router.post("/", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "File is required" });
 
-    const localPath = "/uploads/stories/" + req.file.filename;
-    const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
-
-    // Auth
+    // Auth check
     const authHeader = req.headers["authorization"];
     if (!authHeader) return res.status(401).json("Not logged in!");
     const token = authHeader.split(" ")[1];
     const userInfo = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Save in DB
+    const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
+
+    // Convert file buffer → base64
+    const fileBase64 = Buffer.from(req.file.buffer).toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${fileBase64}`;
+
+    // Upload to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(dataURI, {
+      folder: "campus_connect/stories",
+      resource_type: "auto", // auto detects image/video
+    });
+
+    const fileUrl = uploadResult.secure_url;
     const expiresAt = moment().add(24, "hours").format("YYYY-MM-DD HH:mm:ss");
+
+    // Save in MySQL
     await pool.query(
       "INSERT INTO stories (user_id, img_url, media_type, created_at, expires_at) VALUES (?, ?, ?, NOW(), ?)",
-      [userInfo.id, localPath, mediaType, expiresAt]
+      [userInfo.id, fileUrl, mediaType, expiresAt]
     );
 
-    res.status(200).json({ fileUrl: localPath, media_type: mediaType });
-
-    // Async Cloudinary backup
-    cloudinary.uploader
-      .upload(req.file.path, {
-        folder: "campus_connect/stories",
-        resource_type: mediaType,
-      })
-      .then(result => console.log("✅ Cloud backup uploaded:", result.secure_url))
-      .catch(err => console.error("❌ Cloud backup failed:", err.message));
-
+    res.status(200).json({
+      message: "Story uploaded successfully!",
+      fileUrl,
+      media_type: mediaType,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Upload failed:", err);
     res.status(500).json({ error: "Failed to upload story" });
   }
 });
