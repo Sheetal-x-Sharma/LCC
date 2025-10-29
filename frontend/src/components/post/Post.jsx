@@ -108,7 +108,7 @@ const Post = ({ post, onCommentAdded }) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
       const token = localStorage.getItem("jwt");
-      await fetch(`${API_URL}/api/posts/${post.id}`, {  // ✅ added /api
+      await fetch(`${API_URL}/api/posts/${post.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -119,10 +119,17 @@ const Post = ({ post, onCommentAdded }) => {
     }
   };
 
+  // ✅ FIXED: Use Cloudinary URLs as-is
   const profilePic = post.profilePic?.startsWith("http")
     ? post.profilePic
-    : API_URL + (post.profilePic || "/img1.png");
-  const postImg = post.img ? API_URL + post.img : null;
+    : `${API_URL}${post.profilePic || "/img1.png"}`;
+
+  const postImg =
+    post.img && post.img.startsWith("http")
+      ? post.img
+      : post.img
+      ? `${API_URL}${post.img}`
+      : null;
 
   const handleCommentAddedLocal = (newCount) => {
     setCommentsCount(newCount);
@@ -137,7 +144,10 @@ const Post = ({ post, onCommentAdded }) => {
           <div className="userInfo">
             <img src={profilePic} alt="profile" />
             <div className="details">
-              <Link to={`/profile/${post.userId}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <Link
+                to={`/profile/${post.userId}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
                 <span className="name">{post.name}</span>
               </Link>
               <span className="date">{timeAgo(post.created_at)}</span>
@@ -150,7 +160,9 @@ const Post = ({ post, onCommentAdded }) => {
                 <span>Report</span>
                 <span>Copy Link</span>
                 {currentUser?.id === post.userId && (
-                  <span onClick={handleDelete} style={{ color: "red" }}>Delete</span>
+                  <span onClick={handleDelete} style={{ color: "red" }}>
+                    Delete
+                  </span>
                 )}
               </div>
             )}
@@ -186,15 +198,35 @@ const Post = ({ post, onCommentAdded }) => {
               <img src={linkIcon} alt="Copy Link" />
               Copy Link
             </div>
-            <div className="shareItem" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(postUrl)}`, "_blank")}>
+            <div
+              className="shareItem"
+              onClick={() =>
+                window.open(`https://wa.me/?text=${encodeURIComponent(postUrl)}`, "_blank")
+              }
+            >
               <img src={whatsappIcon} alt="WhatsApp" />
               WhatsApp
             </div>
-            <div className="shareItem" onClick={() => window.open(`mailto:?subject=Check this post&body=${encodeURIComponent(postUrl)}`)}>
+            <div
+              className="shareItem"
+              onClick={() =>
+                window.open(
+                  `mailto:?subject=Check this post&body=${encodeURIComponent(postUrl)}`
+                )
+              }
+            >
               <img src={gmailIcon} alt="Gmail" />
               Gmail
             </div>
-            <div className="shareItem" onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(postUrl)}`, "_blank")}>
+            <div
+              className="shareItem"
+              onClick={() =>
+                window.open(
+                  `https://t.me/share/url?url=${encodeURIComponent(postUrl)}`,
+                  "_blank"
+                )
+              }
+            >
               <img src={telegramIcon} alt="Telegram" />
               Telegram
             </div>
