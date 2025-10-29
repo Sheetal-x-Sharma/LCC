@@ -90,19 +90,24 @@ const Stories = () => {
   const scrollRight = () =>
     scrollRef.current.scrollBy({ left: 250, behavior: "smooth" });
 
-  const getProfileImage = (user) => {
-    if (!user) return ProfileFallback;
+ const getProfileImage = (user) => {
+  if (!user) return ProfileFallback;
 
-    if (user.profile_img?.includes("lh3.googleusercontent.com")) {
-      return `${API_URL}/api/proxy-image?url=${encodeURIComponent(
-        user.profile_img
-      )}`;
-    }
-    if (user.profile_img?.startsWith("/uploads/")) {
-      return `${API_URL}${user.profile_img}`;
-    }
-    return user.profile_img || ProfileFallback;
-  };
+  const img = user.profile_img;
+
+  // ✅ 1. Google account image
+  if (img?.includes("lh3.googleusercontent.com")) return img;
+
+  // ✅ 2. Cloudinary or any external image
+  if (img?.startsWith("http")) return img;
+
+  // ✅ 3. Local fallback (if old data)
+  if (img?.startsWith("/uploads/")) return `${API_URL}${img}`;
+
+  // ✅ 4. Default fallback image
+  return ProfileFallback;
+};
+
 
   return (
     <div className="stories-wrapper">
